@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astronomical Events Calendar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+        }
+        .calendar-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .calendar-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4a90e2;
+        }
+        .calendar-controls {
+            display: flex;
+            gap: 10px;
+        }
+        .calendar-controls button {
+            background-color: #2a2a2a;
+            border: none;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .calendar-controls button:hover {
+            background-color: #4a90e2;
+        }
+        .calendar-selectors {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .calendar-selectors select {
+            background-color: #2a2a2a;
+            border: none;
+            color: #fff;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        .day-header {
+            text-align: center;
+            padding: 10px;
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .calendar-day {
+            aspect-ratio: 1;
+            padding: 10px;
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            position: relative;
+        }
+        .day-number {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .event-indicator {
+            width: 8px;
+            height: 8px;
+            background-color: #4a90e2;
+            border-radius: 50%;
+            margin: 2px;
+            display: inline-block;
+        }
+        .event-tooltip {
+            position: absolute;
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1000;
+            width: 200px;
+            display: none;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .calendar-day:hover .event-tooltip {
+            display: block;
+        }
+        .event-title {
+            font-weight: bold;
+            color: #4a90e2;
+            margin-bottom: 5px;
+        }
+        .event-description {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <h1 class="calendar-title">Astronomical Events Calendar</h1>
+            <div class="calendar-controls">
+                <button id="prevYear"><i class="fas fa-angle-double-left"></i></button>
+                <button id="prevMonth"><i class="fas fa-angle-left"></i></button>
+                <button id="today">Today</button>
+                <button id="nextMonth"><i class="fas fa-angle-right"></i></button>
+                <button id="nextYear"><i class="fas fa-angle-double-right"></i></button>
+            </div>
+        </div>
+        <div class="calendar-selectors">
+            <select id="yearSelect"></select>
+            <select id="monthSelect"></select>
+        </div>
+        <div class="calendar-grid" id="calendarGrid">
+            <!-- Calendar grid will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Initialize variables
+        const today = new Date();
+        let currentYear = today.getFullYear();
+        let currentMonth = today.getMonth();
+
+        // Generate year options (2020-2100)
+        const yearSelect = document.getElementById('yearSelect');
+        for (let year = 2020; year <= 2100; year++) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            yearSelect.appendChild(option);
+        }
+        yearSelect.value = currentYear;
+
+        // Generate month options
+        const monthSelect = document.getElementById('monthSelect');
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        months.forEach((month, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = month;
+            monthSelect.appendChild(option);
+        });
+        monthSelect.value = currentMonth;
+
+        // Function to generate events for a specific year
+        function generateEventsForYear(year) {
+            const events = {};
+            
+            // Generate events for each month
+            for (let month = 0; month < 12; month++) {
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                // Add moon phases
+                events[`${year}-${month + 1}-1`] = {
+                    title: 'New Moon',
+                    description: 'The Moon is not visible as it is between Earth and the Sun.'
+                };
+                events[`${year}-${month + 1}-8`] = {
+                    title: 'First Quarter Moon',
+                    description: 'The Moon is half illuminated and visible in the evening sky.'
+                };
+                events[`${year}-${month + 1}-15`] = {
+                    title: 'Full Moon',
+                    description: 'The Moon is fully illuminated and visible all night.'
+                };
+                events[`${year}-${month + 1}-23`] = {
+                    title: 'Last Quarter Moon',
+                    description: 'The Moon is half illuminated and visible in the morning sky.'
+                };
+
+                // Add planetary events
+                if (month % 3 === 0) {
+                    events[`${year}-${month + 1}-5`] = {
+                        title: 'Mercury at Greatest Elongation',
+                        description: 'Mercury reaches its greatest angular separation from the Sun.'
+                    };
+                }
+                if (month % 4 === 0) {
+                    events[`${year}-${month + 1}-10`] = {
+                        title: 'Venus at Greatest Elongation',
+                        description: 'Venus reaches its greatest angular separation from the Sun.'
+                    };
+                }
+                if (month % 6 === 0) {
+                    events[`${year}-${month + 1}-20`] = {
+                        title: 'Jupiter at Opposition',
+                        description: 'Jupiter is opposite the Sun and visible all night.'
+                    };
+                }
+                if (month % 8 === 0) {
+                    events[`${year}-${month + 1}-25`] = {
+                        title: 'Saturn at Opposition',
+                        description: 'Saturn is opposite the Sun and visible all night.'
+                    };
+                }
+
+                // Add meteor showers
+                if (month === 0) {
+                    events[`${year}-${month + 1}-3`] = {
+                        title: 'Quadrantids Meteor Shower',
+                        description: 'One of the best meteor showers of the year, with up to 40 meteors per hour.'
+                    };
+                }
+                if (month === 3) {
+                    events[`${year}-${month + 1}-22`] = {
+                        title: 'Lyrids Meteor Shower',
+                        description: 'Medium-strength shower producing about 20 meteors per hour.'
+                    };
+                }
+                if (month === 4) {
+                    events[`${year}-${month + 1}-6`] = {
+                        title: 'Eta Aquarids Meteor Shower',
+                        description: 'Good shower producing up to 30 meteors per hour.'
+                    };
+                }
+                if (month === 7) {
+                    events[`${year}-${month + 1}-12`] = {
+                        title: 'Perseids Meteor Shower',
+                        description: 'One of the best meteor showers, producing up to 60 meteors per hour.'
+                    };
+                }
+                if (month === 9) {
+                    events[`${year}-${month + 1}-21`] = {
+                        title: 'Orionids Meteor Shower',
+                        description: 'Medium-strength shower producing about 20 meteors per hour.'
+                    };
+                }
+                if (month === 10) {
+                    events[`${year}-${month + 1}-17`] = {
+                        title: 'Leonids Meteor Shower',
+                        description: 'Medium-strength shower producing about 15 meteors per hour.'
+                    };
+                }
+                if (month === 11) {
+                    events[`${year}-${month + 1}-14`] = {
+                        title: 'Geminids Meteor Shower',
+                        description: 'One of the best meteor showers, producing up to 120 meteors per hour.'
+                    };
+                    events[`${year}-${month + 1}-22`] = {
+                        title: 'Ursids Meteor Shower',
+                        description: 'Minor shower producing about 5-10 meteors per hour.'
+                    };
+                }
+
+                // Add equinoxes and solstices
+                if (month === 2) {
+                    events[`${year}-${month + 1}-20`] = {
+                        title: 'March Equinox',
+                        description: 'First day of spring in the Northern Hemisphere and autumn in the Southern Hemisphere.'
+                    };
+                }
+                if (month === 5) {
+                    events[`${year}-${month + 1}-21`] = {
+                        title: 'June Solstice',
+                        description: 'First day of summer in the Northern Hemisphere and winter in the Southern Hemisphere.'
+                    };
+                }
+                if (month === 8) {
+                    events[`${year}-${month + 1}-22`] = {
+                        title: 'September Equinox',
+                        description: 'First day of autumn in the Northern Hemisphere and spring in the Southern Hemisphere.'
+                    };
+                }
+                if (month === 11) {
+                    events[`${year}-${month + 1}-21`] = {
+                        title: 'December Solstice',
+                        description: 'First day of winter in the Northern Hemisphere and summer in the Southern Hemisphere.'
+                    };
+                }
+
+                // Add random planetary conjunctions
+                const randomDay = Math.floor(Math.random() * daysInMonth) + 1;
+                events[`${year}-${month + 1}-${randomDay}`] = {
+                    title: 'Planetary Conjunction',
+                    description: 'Two or more planets appear close together in the night sky.'
+                };
+            }
+            
+            return events;
+        }
+
+        // Function to update the calendar
+        function updateCalendar() {
+            const calendarGrid = document.getElementById('calendarGrid');
+            if (!calendarGrid) return;
+
+            // Clear the calendar grid
+            calendarGrid.innerHTML = '';
+
+            // Add day headers
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            days.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'day-header';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+
+            // Get the first day of the month
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            
+            // Get the number of days in the month
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            // Add empty cells for days before the first day of the month
+            for (let i = 0; i < firstDay; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'calendar-day';
+                calendarGrid.appendChild(emptyCell);
+            }
+
+            // Generate events for the current year
+            const events = generateEventsForYear(currentYear);
+
+            // Add cells for each day of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+                
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = day;
+                dayCell.appendChild(dayNumber);
+
+                // Check if there are events for this day
+                const dateKey = `${currentYear}-${currentMonth + 1}-${day}`;
+                if (events[dateKey]) {
+                    const eventIndicator = document.createElement('div');
+                    eventIndicator.className = 'event-indicator';
+                    dayCell.appendChild(eventIndicator);
+
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'event-tooltip';
+                    
+                    const eventTitle = document.createElement('div');
+                    eventTitle.className = 'event-title';
+                    eventTitle.textContent = events[dateKey].title;
+                    
+                    const eventDescription = document.createElement('div');
+                    eventDescription.className = 'event-description';
+                    eventDescription.textContent = events[dateKey].description;
+                    
+                    tooltip.appendChild(eventTitle);
+                    tooltip.appendChild(eventDescription);
+                    dayCell.appendChild(tooltip);
+                }
+
+                calendarGrid.appendChild(dayCell);
+            }
+        }
+
+        // Add event listeners
+        document.getElementById('prevYear').addEventListener('click', () => {
+            currentYear--;
+            yearSelect.value = currentYear;
+            updateCalendar();
+        });
+
+        document.getElementById('nextYear').addEventListener('click', () => {
+            currentYear++;
+            yearSelect.value = currentYear;
+            updateCalendar();
+        });
+
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+                yearSelect.value = currentYear;
+            }
+            monthSelect.value = currentMonth;
+            updateCalendar();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+                yearSelect.value = currentYear;
+            }
+            monthSelect.value = currentMonth;
+            updateCalendar();
+        });
+
+        document.getElementById('today').addEventListener('click', () => {
+            currentYear = today.getFullYear();
+            currentMonth = today.getMonth();
+            yearSelect.value = currentYear;
+            monthSelect.value = currentMonth;
+            updateCalendar();
+        });
+
+        yearSelect.addEventListener('change', () => {
+            currentYear = parseInt(yearSelect.value);
+            updateCalendar();
+        });
+
+        monthSelect.addEventListener('change', () => {
+            currentMonth = parseInt(monthSelect.value);
+            updateCalendar();
+        });
+
+        // Initialize the calendar
+        updateCalendar();
+    </script>
+</body>
+</html>
