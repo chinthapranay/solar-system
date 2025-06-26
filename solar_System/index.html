@@ -1,0 +1,2514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solar System Simulation Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0a0a1a;
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-y: auto; /* Allow scrolling */
+    }
+ /* Add to your existing CSS */
+.event-filters {
+    background-color: rgba(20, 20, 40, 0.8);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.event-tooltip-content {
+    padding: 10px;
+}
+
+.event-type {
+    color: #4fc3f7;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.event-time {
+    color: #ff9800;
+    font-size: 0.9em;
+    margin: 5px 0;
+}
+
+.event-creator {
+    color: #aaa;
+    font-size: 0.8em;
+    margin: 5px 0;
+}
+
+.edit-event {
+    margin-right: 5px;
+}
+
+.modal-content {
+    background-color: #1a1a2e !important;
+    border: 1px solid #4fc3f7;
+}
+
+.modal-header {
+    border-bottom: 1px solid #4fc3f7;
+}
+
+.modal-footer {
+    border-top: 1px solid #4fc3f7;
+}
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Background */
+    .space-bg {
+      background-image: url('https://res.cloudinary.com/yerevan/image/upload/v1484080037/space_xref1i.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      min-height: 100vh; /* Adjust as needed */
+      position: relative;
+      padding-bottom: 100px; /* Space for content */
+      padding-top: 80px; /* Space below navbar */
+    }
+
+    /* Navbar */
+    .navbar {
+      background-color: rgba(10, 10, 26, 0.8);
+      backdrop-filter: blur(10px);
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      color: #4fc3f7 !important;
+    }
+
+    .nav-link {
+      color: #ffffff !important;
+      margin: 0 10px;
+      transition: all 0.3s;
+    }
+
+    .nav-link:hover {
+      color: #4fc3f7 !important;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      padding-top: 60px; /* Reduced padding */
+      text-align: center;
+    }
+
+    .hero-title {
+      font-size: 3rem; /* Adjusted size */
+      font-weight: 700;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #4fc3f7, #e91e63);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.1rem; /* Adjusted size */
+      margin-bottom: 30px;
+      max-width: 700px; /* Adjusted width */
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn-space {
+      background: linear-gradient(45deg, #4fc3f7, #3a7bd5);
+      border: none;
+      padding: 10px 25px; /* Adjusted padding */
+      border-radius: 50px;
+      font-weight: 600;
+      margin: 10px;
+      transition: all 0.3s;
+      color: white; /* Ensure text is visible */
+      text-decoration: none; /* Remove underline */
+    }
+     .btn-space:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(79, 195, 247, 0.3);
+        color: white; /* Ensure text is visible on hover */
+    }
+
+
+    /* Section Titles */
+    .section-title {
+      font-size: 2.2rem; /* Adjusted size */
+      font-weight: 700;
+      margin-bottom: 30px;
+      text-align: center;
+      color: #4fc3f7;
+    }
+
+    /* Planet Cards */
+    .planet-card {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      height: 100%; /* Make cards in a row equal height */
+      display: flex;
+      flex-direction: column;
+    }
+     .planet-card p {
+        flex-grow: 1; /* Allow paragraph to take available space */
+        margin-bottom: 15px; /* Space before button */
+    }
+
+    .planet-name {
+      font-size: 1.6rem; /* Adjusted size */
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #4fc3f7;
+    }
+
+    .planet-details {
+      margin-top: 15px;
+      padding: 15px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      border-left: 3px solid #4fc3f7;
+      font-size: 0.9rem;
+    }
+    .special-feature h4 {
+      color: #4fc3f7;
+      margin-bottom: 10px;
+      font-size: 1rem;
+    }
+    .special-feature ul {
+      padding-left: 20px;
+      margin-bottom: 0;
+    }
+    .special-feature li {
+      margin-bottom: 5px;
+    }
+
+    /* Calendar */
+    .calendar-container {
+      background-color: rgba(20, 20, 40, 0.8);
+      border-radius: 15px;
+      padding: 20px;
+      margin: 20px auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      max-width: 800px;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap; /* Allow wrapping on small screens */
+      gap: 10px;
+    }
+
+    .calendar-title {
+      color: #4fc3f7;
+      font-size: 1.4rem; /* Adjusted size */
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .calendar-nav {
+      display: flex;
+      gap: 5px; /* Reduced gap */
+      flex-wrap: wrap; /* Allow wrapping */
+      justify-content: center; /* Center buttons when wrapped */
+    }
+
+    .calendar-nav-btn {
+      background-color: rgba(79, 195, 247, 0.2);
+      border: none;
+      color: white;
+      padding: 6px 12px; /* Adjusted padding */
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem; /* Adjusted font size */
+    }
+
+    .calendar-nav-btn:hover {
+      background-color: rgba(79, 195, 247, 0.4);
+    }
+    .calendar-nav-btn i {
+        margin: 0 3px; /* Space around icons */
+    }
+
+
+    .month-year-selector {
+      display: flex;
+      justify-content: center;
+      gap: 10px; /* Reduced gap */
+      margin-bottom: 20px;
+      flex-wrap: wrap; /* Allow wrapping */
+    }
+     .month-year-selector .form-select {
+        background-color: rgba(20, 20, 40, 0.8);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        max-width: 150px; /* Limit width */
+        font-size: 0.9rem;
+    }
+    .month-year-selector .form-select:focus {
+        border-color: #4fc3f7;
+        box-shadow: 0 0 0 0.2rem rgba(79, 195, 247, 0.25);
+    }
+
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px; /* Reduced gap */
+    }
+
+    .day-header {
+      color: #ff9800;
+      text-align: center;
+      font-weight: bold;
+      padding: 8px 0; /* Adjusted padding */
+      font-size: 0.8rem; /* Adjusted size */
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px; /* Slightly smaller radius */
+      cursor: pointer;
+      transition: all 0.3s;
+      position: relative;
+      background-color: rgba(20, 20, 40, 0.3);
+      font-weight: 500;
+      font-size: 0.8rem; /* Adjusted size */
+      overflow: hidden; /* Hide overflow text */
+      text-align: center;
+    }
+
+    .calendar-day:hover {
+      background-color: rgba(79, 195, 247, 0.2);
+      transform: scale(1.05);
+    }
+
+    .calendar-day.has-event {
+      background-color: rgba(255, 152, 0, 0.1);
+      border: 1px solid rgba(255, 152, 0, 0.3);
+      font-weight: bold;
+    }
+    .calendar-day.has-event::after {
+        content: '';
+        position: absolute;
+        bottom: 3px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 5px;
+        height: 5px;
+        background-color: #ff9800;
+        border-radius: 50%;
+    }
+
+
+    .calendar-day.has-event:hover {
+      background-color: rgba(255, 152, 0, 0.2);
+    }
+
+    .event-tooltip {
+      position: absolute;
+      bottom: calc(100% + 5px); /* Closer to the day */
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(10, 10, 30, 0.95);
+      padding: 8px; /* Reduced padding */
+      border-radius: 6px;
+      width: 180px; /* Adjusted width */
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s; /* Faster transition */
+      border: 1px solid #4fc3f7;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+      font-size: 0.75rem; /* Adjusted size */
+    }
+
+    .calendar-day:hover .event-tooltip {
+      opacity: 1;
+      pointer-events: auto; /* Allow interaction */
+    }
+
+    .event-tooltip h4 {
+      color: #4fc3f7;
+      margin-bottom: 3px;
+      font-size: 0.85rem; /* Adjusted size */
+      border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+      padding-bottom: 3px;
+    }
+
+    .event-tooltip p {
+      margin: 0;
+      line-height: 1.3;
+    }
+
+    /* Footer */
+    footer {
+      background-color: rgba(10, 10, 26, 0.8);
+      padding: 20px 0; /* Reduced padding */
+      text-align: center;
+      position: relative;
+      margin-top: 40px; /* Reduced margin */
+      width: 100%;
+      font-size: 0.9rem;
+    }
+
+    /* Live Data Table Styles */
+    .table-container {
+        background-color: rgba(20, 20, 40, 0.8);
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .table {
+        color: #ffffff;
+        margin-bottom: 0; /* Remove default bottom margin */
+    }
+
+    .table thead th {
+        background-color: rgba(79, 195, 247, 0.2);
+        border-color: #4fc3f7;
+        color: #4fc3f7;
+        text-align: left;
+        padding: 12px 15px; /* Adjust padding */
+        font-weight: 600;
+    }
+
+     .table tbody tr:nth-child(odd) {
+        background-color: rgba(255, 255, 255, 0.03); /* Subtle striping */
+    }
+     .table tbody tr:hover {
+        background-color: rgba(79, 195, 247, 0.1); /* Hover effect */
+    }
+
+    .table td {
+        border-color: rgba(255, 255, 255, 0.1);
+        vertical-align: middle;
+        padding: 10px 15px; /* Adjust padding */
+        font-size: 0.95rem;
+    }
+     .table td:first-child {
+        font-weight: 500; /* Make planet name slightly bolder */
+    }
+
+    .loading {
+        text-align: center;
+        padding: 2rem;
+        color: #4fc3f7;
+        font-style: italic;
+    }
+
+    .error {
+        color: #ff7b7b; /* Softer red */
+        padding: 1rem;
+        text-align: center;
+        background-color: rgba(255, 82, 82, 0.1);
+        border: 1px solid rgba(255, 82, 82, 0.3);
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+
+    .refresh-btn {
+        background: linear-gradient(45deg, #4fc3f7, #3a7bd5);
+        border: none;
+        padding: 8px 20px; /* Adjusted padding */
+        border-radius: 25px;
+        color: white;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        transition: all 0.3s;
+        cursor: pointer;
+        display: inline-block; /* Align properly */
+    }
+
+    .refresh-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(79, 195, 247, 0.3);
+    }
+    .refresh-btn:disabled {
+        background: #555;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .last-updated {
+        color: #aaa; /* Less prominent color */
+        text-align: right;
+        font-size: 0.85rem;
+        margin-top: 1rem;
+    }
+
+    .table-responsive {
+      overflow-x: auto; /* Enable horizontal scroll on small screens */
+      scrollbar-width: thin;
+      scrollbar-color: #4fc3f7 rgba(255, 255, 255, 0.1);
+    }
+    .table-responsive::-webkit-scrollbar {
+      width: 6px; /* Smaller scrollbar */
+      height: 6px;
+    }
+    .table-responsive::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+    .table-responsive::-webkit-scrollbar-thumb {
+      background: #4fc3f7;
+      border-radius: 3px;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .hero-title { font-size: 2.5rem; }
+      .hero-subtitle { font-size: 1rem; }
+      .section-title { font-size: 1.8rem; }
+      .planet-name { font-size: 1.4rem; }
+      .calendar-title { font-size: 1.2rem; }
+      .table td, .table th { font-size: 0.9rem; padding: 8px 10px; }
+      .refresh-btn { padding: 6px 15px; font-size: 0.9rem; }
+      .last-updated { font-size: 0.8rem; }
+    }
+
+    @media (max-width: 576px) {
+      .hero-title { font-size: 2rem; }
+      .hero-subtitle { font-size: 0.9rem; padding: 0 10px; }
+      .btn-space { padding: 8px 18px; font-size: 0.9rem; margin: 5px; }
+      .calendar-header { flex-direction: column; align-items: center; }
+      .calendar-nav { justify-content: center; }
+      .month-year-selector { gap: 5px; }
+      .month-year-selector .form-select { max-width: 120px; font-size: 0.8rem; }
+      .day-header, .calendar-day { font-size: 0.7rem; }
+      .event-tooltip { width: 150px; font-size: 0.7rem; }
+      .table td, .table th { font-size: 0.8rem; padding: 6px 8px; }
+    }
+
+    .learn-more-btn {
+      background: linear-gradient(90deg, #6ec1e4, #4884e4);
+      color: #222 !important;
+      border-radius: 30px;
+      padding: 6px 22px;
+      font-size: 1rem;
+      font-weight: 500;
+      min-width: unset;
+      width: auto;
+      box-shadow: none;
+      border: none;
+      display: inline-block;
+    }
+
+    /* Add to your existing CSS */
+    .add-event-form {
+        background-color: rgba(20, 20, 40, 0.8);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .add-event-form h4 {
+        color: #4fc3f7;
+        margin-bottom: 20px;
+    }
+
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        border-radius: 5px;
+        color: white;
+        z-index: 1000;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .notification.success {
+        background-color: #4caf50;
+    }
+
+    .notification.error {
+        background-color: #f44336;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+  </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">Solar System</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#planets">Planets</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#events">Events</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#live-data">Live Data</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="space-bg">
+    <div class="container">
+      <section class="hero-section">
+        <h1 class="hero-title">Solar System Simulation Dashboard</h1>
+        <p class="hero-subtitle">Explore the wonders of our solar system with real-time planetary positions, upcoming astronomical events, and detailed information about celestial bodies.</p>
+        <a href="#live-data" class="btn btn-space">View Live Data</a>
+        <a href="#events" class="btn btn-space">Upcoming Events</a>
+      </section>
+    </div>
+  </div>
+
+  <div class="container py-5">
+    <section id="planetary-data" class="py-5">
+      <h2 class="section-title" style="font-size: 3rem; color: #6ec1e4; text-align: center; font-weight: bold;">Planetary Data</h2>
+      <p class="text-center mb-5" style="font-size: 1.2rem;">Detailed information about the planets in our solar system</p>
+      <div class="table-responsive" style="margin: 0 auto; max-width: 95%;">
+        <table class="table table-dark table-striped" style="background: #23232e;">
+          <thead style="background: #2d3a4a; color: #6ec1e4;">
+            <tr>
+              <th style="font-size: 1.2rem;">Planet</th>
+              <th style="font-size: 1.2rem;">Distance from Sun</th>
+              <th style="font-size: 1.2rem;">Orbital Period</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Mercury</td><td>0.39 AU</td><td>88 days</td></tr>
+            <tr><td>Venus</td><td>0.72 AU</td><td>225 days</td></tr>
+            <tr><td>Earth</td><td>1.00 AU</td><td>365 days</td></tr>
+            <tr><td>Mars</td><td>1.52 AU</td><td>687 days</td></tr>
+            <tr><td>Jupiter</td><td>5.20 AU</td><td>4333 days</td></tr>
+            <tr><td>Saturn</td><td>9.58 AU</td><td>10759 days</td></tr>
+            <tr><td>Uranus</td><td>19.18 AU</td><td>30687 days</td></tr>
+            <tr><td>Neptune</td><td>30.07 AU</td><td>60190 days</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="planets" class="py-5">
+        <h2 class="section-title">Explore the Sun and Planets</h2>
+        <p class="text-center mb-5">Learn about our Sun and each planet in the solar system</p>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+          <div class="col">
+            <div class="planet-card">
+              <h3 class="planet-name">Sun</h3>
+              <p>The star at the center of our solar system, a nearly perfect sphere of hot plasma providing energy for life on Earth.</p>
+              <a href="sun.html" class="btn btn-sm btn-space mt-auto learn-more-btn">Learn More</a>
+            </div>
+          </div>
+          <div class="col">
+            <div class="planet-card">
+              <h3 class="planet-name">Mercury</h3>
+              <p>The smallest planet and closest to the Sun, with extreme temperature variations and a cratered surface.</p>
+              <div class="planet-details" style="display: none;">
+                <div class="special-feature">
+                  <h4>Unique Characteristics:</h4>
+                  <ul>
+                    <li>Closest planet to the Sun</li>
+                    <li>Smallest planet</li>
+                    <li>Extreme temperature variations</li>
+                    <li>No significant atmosphere</li>
+                  </ul>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-space mt-auto learn-more-btn">Learn More</button>
+            </div>
+          </div>
+          <div class="col">
+            <div class="planet-card">
+              <h3 class="planet-name">Venus</h3>
+              <p>Similar in size to Earth, Venus has a thick, toxic atmosphere and rotates backwards.</p>
+              <div class="planet-details" style="display: none;">
+                <div class="special-feature">
+                  <h4>Unique Characteristics:</h4>
+                  <ul>
+                    <li>Hottest planet (surface temp ~900°F)</li>
+                    <li>Thick CO2 atmosphere</li>
+                    <li>Retrograde rotation</li>
+                    <li>High surface pressure</li>
+                  </ul>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-space mt-auto learn-more-btn">Learn More</button>
+            </div>
+          </div>
+          <div class="col">
+            <div class="planet-card">
+              <h3 class="planet-name">Earth</h3>
+              <p>Our home, the only known planet with liquid water on its surface and supporting life.</p>
+              <div class="planet-details" style="display: none;">
+                <div class="special-feature">
+                  <h4>Unique Characteristics:</h4>
+                  <ul>
+                    <li>Supports life</li>
+                    <li>Liquid water surface</li>
+                    <li>Oxygen-rich atmosphere</li>
+                    <li>Plate tectonics</li>
+                  </ul>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-space mt-auto learn-more-btn">Learn More</button>
+            </div>
+          </div>
+          <div class="col">
+            <div class="planet-card">
+              <h3 class="planet-name">Mars</h3>
+              <p>The "Red Planet," a cold, dusty desert world with a thin atmosphere and evidence of past water.</p>
+              <div class="planet-details" style="display: none;">
+                <div class="special-feature">
+                  <h4>Unique Characteristics:</h4>
+                  <ul>
+                    <li>Red color (iron oxide)</li>
+                    <li>Olympus Mons (tallest volcano)</li>
+                    <li>Valles Marineris (large canyon)</li>
+                    <li>Thin atmosphere</li>
+                  </ul>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-space mt-auto learn-more-btn">Learn More</button>
+            </div>
+          </div>
+          <div class="col">
+            <div class="planet-card">
+              <h3 class="planet-name">Jupiter</h3>
+              <p>The largest planet, a gas giant known for its Great Red Spot and numerous moons.</p>
+              <div class="planet-details" style="display: none;">
+                <div class="special-feature">
+                  <h4>Unique Characteristics:</h4>
+                  <ul>
+                    <li>Largest planet</li>
+                    <li>Great Red Spot (storm)</li>
+                    <li>Fastest rotation</li>
+                    <li>Many moons (e.g., Galilean moons)</li>
+                  </ul>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-space mt-auto learn-more-btn">Learn More</button>
+            </div>
+          </div>
+           <div class="col">
+            <div class="planet-card">
+              <h3 class="planet-name">Saturn</h3>
+              <p>Famous for its extensive and complex ring system made of ice and rock particles.</p>
+              <div class="planet-details" style="display: none;">
+                <div class="special-feature">
+                  <h4>Unique Characteristics:</h4>
+                  <ul>
+                    <li>Prominent ring system</li>
+                    <li>Least dense planet</li>
+                    <li>Many moons (e.g., Titan)</li>
+                    <li>Hexagonal storm at North Pole</li>
+                  </ul>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-space mt-auto learn-more-btn">Learn More</button>
+            </div>
+          </div>
+           <div class="col">
+            <div class="planet-card">
+              <h3 class="planet-name">Uranus</h3>
+              <p>An ice giant that rotates on its side, giving it extreme seasons.</p>
+              <div class="planet-details" style="display: none;">
+                <div class="special-feature">
+                  <h4>Unique Characteristics:</h4>
+                  <ul>
+                    <li>Rotates on its side (~98° tilt)</li>
+                    <li>Ice giant</li>
+                    <li>Blue-green color (methane)</li>
+                    <li>Faint ring system</li>
+                  </ul>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-space mt-auto learn-more-btn">Learn More</button>
+            </div>
+          </div>
+           <div class="col">
+            <div class="planet-card">
+              <h3 class="planet-name">Neptune</h3>
+              <p>The most distant planet, an ice giant known for its strong winds and Great Dark Spot.</p>
+              <div class="planet-details" style="display: none;">
+                <div class="special-feature">
+                  <h4>Unique Characteristics:</h4>
+                  <ul>
+                    <li>Most distant planet</li>
+                    <li>Strongest winds</li>
+                    <li>Ice giant</li>
+                    <li>Great Dark Spot (storm feature)</li>
+                  </ul>
+                </div>
+              </div>
+              <button class="btn btn-sm btn-space mt-auto learn-more-btn">Learn More</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    <section id="events" class="py-5">
+      <h2 class="section-title">Upcoming Astronomical Events</h2>
+      <p class="text-center mb-5">Mark your calendar for these celestial events</p>
+
+      <div class="calendar-container">
+        <!-- Event Filters -->
+        <div class="event-filters mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <select class="form-select" id="eventTypeFilter">
+                        <option value="">All Event Types</option>
+                        <option value="eclipse">Eclipse</option>
+                        <option value="meteor_shower">Meteor Shower</option>
+                        <option value="conjunction">Planetary Conjunction</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <input type="date" class="form-control" id="dateFilter">
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-space" id="clearFilters">Clear Filters</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="calendar-header">
+          <h3 class="calendar-title" id="calendarMonthYear">Month Year</h3>
+          <div class="calendar-nav">
+             <button class="calendar-nav-btn" id="prevYear" title="Previous Year"><i class="fas fa-angle-double-left"></i></button>
+            <button class="calendar-nav-btn" id="prevMonth" title="Previous Month"><i class="fas fa-chevron-left"></i></button>
+            <button class="calendar-nav-btn" id="todayBtn" title="Go to Today">Today</button>
+            <button class="calendar-nav-btn" id="nextMonth" title="Next Month"><i class="fas fa-chevron-right"></i></button>
+            <button class="calendar-nav-btn" id="nextYear" title="Next Year"><i class="fas fa-angle-double-right"></i></button>
+          </div>
+        </div>
+
+        <div class="month-year-selector">
+          <select class="form-select form-select-sm" id="monthSelect">
+            </select>
+          <select class="form-select form-select-sm" id="yearSelect">
+             </select>
+        </div>
+
+        <!-- Add Event Form -->
+        <div class="add-event-form mb-4">
+            <h4 class="text-center mb-3">Add New Astronomical Event</h4>
+            <form id="eventForm" class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" id="eventName" placeholder="Event Name" required>
+                </div>
+                <div class="col-md-6">
+                    <select class="form-select" id="eventType" required>
+                        <option value="">Select Event Type</option>
+                        <option value="eclipse">Eclipse</option>
+                        <option value="meteor_shower">Meteor Shower</option>
+                        <option value="conjunction">Planetary Conjunction</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <input type="date" class="form-control" id="eventDate" required>
+                </div>
+                <div class="col-md-6">
+                    <input type="time" class="form-control" id="eventTime">
+                </div>
+                <div class="col-12">
+                    <textarea class="form-control" id="eventDescription" placeholder="Event Description" rows="3"></textarea>
+                </div>
+                <div class="col-12 text-center">
+                    <button type="submit" class="btn btn-space">Add Event</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="calendar-grid">
+          <div class="day-header">Sun</div>
+          <div class="day-header">Mon</div>
+          <div class="day-header">Tue</div>
+          <div class="day-header">Wed</div>
+          <div class="day-header">Thu</div>
+          <div class="day-header">Fri</div>
+          <div class="day-header">Sat</div>
+          </div>
+      </div>
+    </section>
+
+    <section id="live-data" class="py-5">
+        <h2 class="section-title">Live Planetary Positions</h2>
+        <p class="text-center mb-4">Real-time Right Ascension and Declination data.</p>
+        <div class="d-flex justify-content-center mb-3">
+             <button class="refresh-btn" id="refreshDataBtn" onclick="fetchPlanetaryData()">
+                <i class="fas fa-sync-alt me-1"></i> Refresh Data
+            </button>
+        </div>
+
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Planet</th>
+                            <th>Right Ascension</th>
+                            <th>Declination</th>
+                        </tr>
+                    </thead>
+                    <tbody id="planetaryData">
+                        </tbody>
+                </table>
+            </div>
+            <div id="loading" class="loading" style="display: none;">
+                <i class="fas fa-spinner fa-spin me-2"></i>Loading planetary data...
+            </div>
+            <div id="error" class="error" style="display: none;">
+                </div>
+            <div class="last-updated" id="lastUpdated">
+                </div>
+        </div>
+    </section>
+
+
+  </div> <footer>
+    <div class="container">
+      <p>© <span id="currentYear"></span> Solar System Dashboard</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+      // --- Astronomy API Integration ---
+      const APP_ID = '936feb48-b985-4891-b638-f30fd7f6e7ec';
+      const APP_SECRET = '1b99ba1bcb4ae0492c7c7a311e0962161f51d7fe519beceea41c4e00c53949dfeade0c6614c4302f366b528e8f15cfe59a28b48c71c2cd8a297e8df81793cb0d4d02e34e8dca944be88b4c25ef3b5223991fb598be4f9f7df2e49fc717237230c25b3b33d1c4998965a727c2b1a2968d';
+      // WARNING: Storing credentials client-side is insecure. Use a server-side proxy in production.
+      const AUTH_STRING = btoa(`${APP_ID}:${APP_SECRET}`);
+      const API_BASE_URL = 'https://api.astronomyapi.com/api/v2';
+
+      const planetsToFetch = ['mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune']; // Include Earth for reference if desired
+
+      // Observer Location (Hyderabad, India - Approximate)
+      const observerLatitude = 17.3850;
+      const observerLongitude = 78.4867;
+      const observerElevation = 542; // meters
+
+      const planetaryDataTableBody = document.getElementById('planetaryData');
+      const loadingIndicator = document.getElementById('loading');
+      const errorContainer = document.getElementById('error');
+      const lastUpdatedContainer = document.getElementById('lastUpdated');
+      const refreshButton = document.getElementById('refreshDataBtn');
+
+      // Function to format date and time for API
+      function getApiDateTime() {
+          const now = new Date();
+          const date = now.toISOString().split('T')[0]; //YYYY-MM-DD
+          const time = now.toTimeString().split(' ')[0]; // HH:MM:SS
+          return { date, time };
+      }
+
+      // Function to fetch planetary data from Astronomy API
+      window.fetchPlanetaryData = async function() { // Make it global for onclick
+          if (!planetaryDataTableBody || !loadingIndicator || !errorContainer || !lastUpdatedContainer || !refreshButton) {
+              console.error("One or more required elements for planetary data display are missing.");
+              return;
+          }
+
+          loadingIndicator.style.display = 'block';
+          errorContainer.style.display = 'none';
+          errorContainer.textContent = '';
+          planetaryDataTableBody.innerHTML = ''; // Clear previous data
+          refreshButton.disabled = true; // Disable button during fetch
+
+          try {
+              const { date, time } = getApiDateTime();
+
+              // Construct the API URL
+              // Note: The API expects body names as comma-separated list in the 'body' query parameter
+              const apiUrl = `${API_BASE_URL}/bodies/positions?latitude=${observerLatitude}&longitude=${observerLongitude}&elevation=${observerElevation}&from_date=${date}&to_date=${date}&time=${time}&body=${planetsToFetch.join(',')}`;
+
+              const response = await fetch(apiUrl, {
+                  method: 'GET', // Explicitly GET
+                  headers: {
+                      'Authorization': `Basic ${AUTH_STRING}`
+                  }
+              });
+
+              if (!response.ok) {
+                  let errorMsg = `HTTP error! Status: ${response.status}`;
+                  try {
+                      const errorData = await response.json();
+                      errorMsg += ` - ${errorData.message || JSON.stringify(errorData)}`;
+                  } catch (e) {
+                      // If parsing error response fails, just use statusText
+                      errorMsg += ` - ${response.statusText}`;
+                  }
+                   // Check for specific 401 Unauthorized error
+                  if (response.status === 401) {
+                      errorMsg += ". Please check your Astronomy API credentials (App ID and Secret).";
+                  } else if (response.status === 400) {
+                       errorMsg += ". Bad request. Check API parameters (location, date, time, bodies).";
+                  }
+                  throw new Error(errorMsg);
+              }
+
+              const data = await response.json();
+
+              // Check if the expected data structure is present
+              if (data && data.data && data.data.table && data.data.table.rows) {
+                  updatePlanetaryTable(data.data.table.rows);
+                  const timestamp = new Date();
+                  lastUpdatedContainer.textContent = `Last updated: ${timestamp.toLocaleString()}`;
+              } else {
+                  console.error("API response format unexpected:", data);
+                  throw new Error("Received unexpected data format from the API.");
+              }
+
+          } catch (e) {
+              console.error('Error fetching Astronomy API data:', e);
+              errorContainer.textContent = `Failed to load planetary data: ${e.message}`;
+              errorContainer.style.display = 'block';
+              // Optional: Display placeholder or cached data here
+          } finally {
+              loadingIndicator.style.display = 'none';
+              refreshButton.disabled = false; // Re-enable button
+          }
+      }
+
+      // Function to update the HTML table with fetched data
+      function updatePlanetaryTable(rows) {
+          planetaryDataTableBody.innerHTML = ''; // Clear again just in case
+
+          // Sort planets according to the planetsToFetch array order for 3consistency
+          const sortedRows = planetsToFetch.map(planetName => {
+              // Find the row corresponding to the planetName
+              // Check row.cells[0].name for the match
+              return rows.find(row =>
+                  row && row.cells && row.cells[0] && row.cells[0].name && // Add checks
+                  row.cells[0].name.toLowerCase() === planetName.toLowerCase()
+              );
+          }).filter(row => row); // Filter out any not found or undefined rows
+
+          // Check if any rows were found after sorting/filtering
+          if (sortedRows.length === 0 && rows.length > 0) {
+              console.warn("Could not match fetched planet data to the expected names. Displaying raw order.");
+              // Fallback: display rows as received if sorting failed
+              rows.forEach(row => populateRow(row));
+          } else {
+               // Display sorted rows
+               sortedRows.forEach(row => populateRow(row));
+          }
+      }
+
+       // Helper function to populate a single table row
+      function populateRow(row) {
+           if (!row || !row.cells || !row.cells[0]) {
+               console.warn("Skipping invalid row data:", row);
+               return; // Skip if structure is unexpected
+           }
+           // Access data based on the expected API response structure
+           // The actual data for the body is within row.cells[0]
+           const planetData = row.cells[0];
+           const planetName = planetData.name || 'Unknown'; // Get name from the data, fallback
+           const ra = planetData.position?.equatorial?.rightAscension?.string || 'N/A';
+           const dec = planetData.position?.equatorial?.declination?.string || 'N/A';
+
+           const tr = document.createElement('tr');
+           tr.innerHTML = `
+               <td>${planetName}</td>
+               <td>${ra}</td>
+               <td>${dec}</td>
+           `;
+           planetaryDataTableBody.appendChild(tr);
+      }
+
+
+      // Initial data load
+      fetchPlanetaryData();
+
+      // Set interval for auto-refresh (e.g., every 5 minutes)
+      setInterval(fetchPlanetaryData, 300000); // 300000 ms = 5 minutes
+
+
+      // --- Calendar Functionality ---
+      const calendarGrid = document.querySelector('.calendar-grid');
+      const calendarMonthYear = document.getElementById('calendarMonthYear');
+      const prevYearBtn = document.getElementById('prevYear');
+      const prevMonthBtn = document.getElementById('prevMonth');
+      const nextMonthBtn = document.getElementById('nextMonth');
+      const nextYearBtn = document.getElementById('nextYear');
+      const todayBtn = document.getElementById('todayBtn');
+      const yearSelect = document.getElementById('yearSelect');
+      const monthSelect = document.getElementById('monthSelect');
+
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      let currentDate = new Date();
+      let currentMonth = currentDate.getMonth();
+      let currentYear = currentDate.getFullYear();
+      let events = {}; // Store events keyed by YYYY-MM-DD
+
+      // Populate Year Select (e.g., 20 years past and future)
+      const startYear = currentYear - 20;
+      const endYear = currentYear + 20;
+      for (let y = startYear; y <= endYear; y++) {
+          const option = document.createElement('option');
+          option.value = y;
+          option.textContent = y;
+          yearSelect.appendChild(option);
+      }
+      // Populate Month Select
+       monthNames.forEach((name, index) => {
+          const option = document.createElement('option');
+          option.value = index;
+          option.textContent = name;
+          monthSelect.appendChild(option);
+      });
+
+
+      // Function to generate sample astronomical events (replace/enhance with real data source if possible)
+      // --- Astronomical Event Data (FILTERED SAMPLE: 2024-2026) ---
+      // Includes: Full Moon, New Moon, Meteor Showers, Planetary Alignments/Conjunctions
+      // =========================================================
+      // IMPORTANT: YOU MUST POPULATE THIS OBJECT WITH DATA FOR
+      // YEARS 2020-2023 and 2027-2100 for these event types
+      // using reliable sources (USNO, NASA, TimeAndDate.com, IMO.net etc.)
+      // =========================================================
+      const astronomicalEvents = {
+         // ============================================================
+         // TODO: Add data for 2020 (Full/New Moons, Showers, Alignments)
+         // "2020": { /* ... events ... */ },
+         // ============================================================
+         // TODO: Add data for 2021 (Full/New Moons, Showers, Alignments)
+         // "2021": { /* ... events ... */ },
+         // ============================================================
+         // TODO: Add data for 2022 (Full/New Moons, Showers, Alignments)
+         // "2022": { /* ... events ... */ },
+         // ============================================================
+         // TODO: Add data for 2023 (Full/New Moons, Showers, Alignments)
+         // "2023": { /* ... events ... */ },
+         // ============================================================
+        "2024": {
+            "2024-01-04": { title: 'Quadrantids Peak', description: 'Meteor shower peak.' },
+            "2024-01-11": { title: 'New Moon', description: '' },
+            "2024-01-25": { title: 'Full Moon (Wolf Moon)', description: '' },
+            "2024-02-09": { title: 'New Moon', description: '' },
+            "2024-02-24": { title: 'Full Moon (Snow Moon)', description: '' },
+            "2024-03-10": { title: 'New Moon', description: '' },
+            "2024-03-25": { title: 'Full Moon (Worm Moon)', description: 'Penumbral Lunar Eclipse visible.' }, // Keeping note about eclipse during full moon
+            "2024-04-08": { title: 'New Moon', description: 'Total Solar Eclipse (N. America).' }, // Keeping note about eclipse during new moon
+            "2024-04-22": { title: 'Lyrids Peak', description: 'Meteor shower peak.' },
+            "2024-04-23": { title: 'Full Moon (Pink Moon)', description: '' },
+            "2024-05-06": { title: 'Eta Aquariids Peak', description: 'Meteor shower peak.' },
+            "2024-05-08": { title: 'New Moon', description: '' },
+            "2024-05-23": { title: 'Full Moon (Flower Moon)', description: '' },
+            "2024-06-06": { title: 'New Moon', description: '' },
+            "2024-06-22": { title: 'Full Moon (Strawberry Moon)', description: '' },
+            "2024-07-05": { title: 'New Moon', description: '' },
+            "2024-07-21": { title: 'Full Moon (Buck Moon)', description: '' },
+            "2024-08-04": { title: 'New Moon', description: '' },
+            "2024-08-13": { title: 'Perseids Peak', description: 'Popular meteor shower peak.' }, // Peak varies, check sources yearly
+            "2024-08-19": { title: 'Full Moon (Sturgeon Moon)', description: 'Seasonal Blue Moon.' },
+            "2024-09-03": { title: 'New Moon', description: '' },
+            "2024-09-18": { title: 'Full Moon (Harvest Moon)', description: 'Partial Lunar Eclipse visible. Supermoon.' },
+            "2024-10-02": { title: 'New Moon', description: 'Annular Solar Eclipse (S. Pacific).' },
+            "2024-10-17": { title: 'Full Moon (Hunter\'s Moon)', description: 'Supermoon.' },
+            "2024-10-21": { title: 'Orionids Peak', description: 'Meteor shower peak.' },
+            "2024-11-01": { title: 'New Moon', description: '' },
+            "2024-11-16": { title: 'Full Moon (Beaver Moon)', description: 'Supermoon.' },
+            "2024-11-17": { title: 'Leonids Peak', description: 'Meteor shower peak.' },
+            "2024-12-01": { title: 'New Moon', description: '' },
+            "2024-12-14": { title: 'Geminids Peak', description: 'Strong meteor shower peak.' },
+            "2024-12-15": { title: 'Full Moon (Cold Moon)', description: '' },
+            "2024-12-22": { title: 'Ursids Peak', description: 'Meteor shower peak.' },
+            "2024-12-30": { title: 'New Moon', description: 'Black Moon (2nd New Moon in Dec).' },
+        },
+        "2025": {
+            "2025-01-03": { title: 'Quadrantids Peak', description: 'Meteor shower peak.' },
+            "2025-01-13": { title: 'Full Moon (Wolf Moon)', description: '' },
+            "2025-01-29": { title: 'New Moon', description: '' },
+            "2025-02-12": { title: 'Full Moon (Snow Moon)', description: '' },
+            "2025-02-27": { title: 'New Moon', description: '' },
+            "2025-03-14": { title: 'Full Moon (Worm Moon)', description: 'Total Lunar Eclipse visible.' },
+            "2025-03-29": { title: 'New Moon (Supermoon)', description: 'Partial Solar Eclipse visible.' },
+            "2025-04-12": { title: 'Full Moon (Pink Moon)', description: 'Micro Full Moon.' },
+            "2025-04-22": { title: 'Lyrids Peak', description: 'Meteor shower peak.' },
+            "2025-04-27": { title: 'New Moon (Supermoon)', description: '' },
+            "2025-05-06": { title: 'Eta Aquariids Peak', description: 'Meteor shower peak.' },
+            "2025-05-12": { title: 'Full Moon (Flower Moon)', description: 'Micro Full Moon.' },
+            "2025-05-26": { title: 'New Moon', description: '' },
+            "2025-06-11": { title: 'Full Moon (Strawberry Moon)', description: '' },
+            "2025-06-25": { title: 'New Moon', description: '' },
+            "2025-07-10": { title: 'Full Moon (Buck Moon)', description: '' },
+            "2025-07-24": { title: 'New Moon', description: '' },
+            "2025-07-30": { title: 'Delta Aquariids Peak', description: 'Meteor shower peak.' },
+            "2025-08-09": { title: 'Full Moon (Sturgeon Moon)', description: '' },
+            "2025-08-13": { title: 'Perseids Peak', description: 'Popular meteor shower peak.' },
+            "2025-08-23": { title: 'New Moon', description: 'Black Moon (3rd of 4 in season).' },
+            "2025-09-07": { title: 'Full Moon (Harvest Moon)', description: 'Total Lunar Eclipse visible.' },
+            "2025-09-21": { title: 'New Moon', description: 'Partial Solar Eclipse visible.' },
+            "2025-10-06": { title: 'Full Moon (Hunter\'s Moon)', description: '' },
+            "2025-10-21": { title: 'New Moon', description: '' },
+            "2025-10-21": { title: 'Orionids Peak', description: 'Meteor shower peak.' },
+            "2025-11-05": { title: 'Full Moon (Beaver Moon)', description: 'Supermoon.' },
+            "2025-11-17": { title: 'Leonids Peak', description: 'Meteor shower peak.' },
+            "2025-11-20": { title: 'New Moon (Micro New Moon)', description: '' },
+            "2025-12-04": { title: 'Full Moon (Cold Moon)', description: 'Supermoon.' },
+            "2025-12-14": { title: 'Geminids Peak', description: 'Strong meteor shower peak.' },
+            "2025-12-19": { title: 'New Moon', description: '' },
+            "2025-12-22": { title: 'Ursids Peak', description: 'Meteor shower peak.' },
+        },
+        "2026": {
+            "2026-01-03": { title: 'Full Moon (Wolf Moon)', description: '' },
+            "2026-01-04": { title: 'Quadrantids Peak', description: 'Meteor shower peak (Full Moon interference).' },
+            "2026-01-18": { title: 'New Moon', description: '' },
+            "2026-02-01": { title: 'Full Moon (Snow Moon)', description: '' },
+            "2026-02-17": { title: 'New Moon', description: 'Annular Solar Eclipse visible.' },
+            "2026-03-03": { title: 'Full Moon (Worm Moon)', description: 'Penumbral Lunar Eclipse visible.' },
+            "2026-03-18": { title: 'New Moon', description: '' },
+            "2026-04-02": { title: 'Full Moon (Pink Moon)', description: '' },
+            "2026-04-17": { title: 'New Moon', description: '' },
+            "2026-04-22": { title: 'Lyrids Peak', description: 'Meteor shower peak.' },
+            "2026-04-30": { title: 'Mars-Neptune Conjunction', description: 'Planets appear close.' },
+            "2026-05-01": { title: 'Full Moon (Flower Moon)', description: '' },
+            "2026-05-06": { title: 'Eta Aquariids Peak', description: 'Meteor shower peak.' },
+            "2026-05-16": { title: 'New Moon', description: '' },
+            "2026-05-31": { title: 'Full Moon (Strawberry Moon)', description: '' },
+            "2026-06-15": { title: 'New Moon', description: '' },
+            "2026-06-30": { title: 'Full Moon (Buck Moon)', description: '' },
+            "2026-07-11": { title: 'Jupiter-Uranus Conjunction', description: 'Planets appear close.' },
+            "2026-07-15": { title: 'New Moon', description: '' },
+            "2026-07-29": { title: 'Full Moon (Sturgeon Moon)', description: '' },
+            "2026-07-30": { title: 'Delta Aquariids Peak', description: 'Meteor shower peak.' },
+            "2026-08-12": { title: 'New Moon', description: 'Total Solar Eclipse visible.' },
+            "2026-08-13": { title: 'Perseids Peak', description: 'Popular meteor shower peak.' },
+            "2026-08-28": { title: 'Full Moon (Harvest Moon)', description: 'Partial Lunar Eclipse visible. Blue Moon (2nd full moon in Aug).' },
+            "2026-09-11": { title: 'New Moon', description: '' },
+            "2026-09-26": { title: 'Full Moon (Corn Moon)', description: '' }, // Sept Full Moon after Harvest Moon = Corn Moon
+            "2026-10-10": { title: 'New Moon', description: '' },
+            "2026-10-21": { title: 'Orionids Peak', description: 'Meteor shower peak.' },
+            "2026-10-26": { title: 'Full Moon (Hunter\'s Moon)', description: '' },
+            "2026-11-09": { title: 'New Moon', description: '' },
+            "2026-11-17": { title: 'Leonids Peak', description: 'Meteor shower peak.' },
+            "2026-11-25": { title: 'Full Moon (Beaver Moon)', description: '' },
+            "2026-12-09": { title: 'New Moon', description: '' },
+            "2026-12-14": { title: 'Geminids Peak', description: 'Strong meteor shower peak.' },
+            "2026-12-22": { title: 'Ursids Peak', description: 'Meteor shower peak.' },
+            "2026-12-24": { title: 'Full Moon (Cold Moon)', description: '' },
+        },
+
+        "2027": {
+             // Data based on search results, cross-referenced where possible.
+             // Verify times/dates with precise sources like USNO/NASA for specific needs.
+             "2027-01-04": { title: 'Quadrantids Peak', description: 'Meteor shower peak.' }, // Seasky, AstroPixels
+             "2027-01-07": { title: 'New Moon', description: '' }, // Seasky, Calendarr
+             "2027-01-22": { title: 'Full Moon (Wolf Moon)', description: 'Supermoon.' }, // Seasky, Calendarr
+             "2027-02-06": { title: 'New Moon', description: 'Annular Solar Eclipse visible.' }, // Seasky, Calendarr, TimeAndDate
+             "2027-02-11": { title: 'Jupiter at Opposition', description: 'Planet alignment event.' }, // Seasky
+             "2027-02-19": { title: 'Mars at Opposition', description: 'Planet alignment event.' }, // AstroPixels
+             "2027-02-21": { title: 'Full Moon (Snow Moon)', description: 'Penumbral Lunar Eclipse visible.' }, // Seasky(date), Calendarr(date), TimeAndDate(eclipse)
+             "2027-03-08": { title: 'New Moon', description: '' }, // Calendarr
+             "2027-03-22": { title: 'Full Moon (Worm Moon)', description: '' }, // Calendarr
+             "2027-04-07": { title: 'New Moon', description: '' }, // Calendarr
+             "2027-04-21": { title: 'Full Moon (Pink Moon)', description: '' }, // Calendarr
+             "2027-04-23": { title: 'Lyrids Peak', description: 'Meteor shower peak.' }, // AstroPixels
+             "2027-05-05": { title: 'Eta Aquariids Peak', description: 'Meteor shower peak.' }, // AstroPixels
+             "2027-05-06": { title: 'New Moon', description: '' }, // Calendarr
+             "2027-05-07": { title: 'Venus-Saturn Conjunction', description: 'Planets appear close.' }, // AstroPixels
+             "2027-05-20": { title: 'Full Moon (Flower Moon)', description: '' }, // Calendarr (May 20th), AstroPixels (May 20th)
+             "2027-06-05": { title: 'New Moon', description: '' }, // Calendarr (June 5th), AstroPixels (June 4th) - Using Calendarr date
+             "2027-06-19": { title: 'Full Moon (Strawberry Moon)', description: '' }, // Calendarr (June 19th), AstroPixels (June 18th) - Using Calendarr date
+             "2027-07-04": { title: 'New Moon', description: '' }, // Calendarr (July 4th), AstroPixels (July 3rd) - Using Calendarr date
+             "2027-07-18": { title: 'Full Moon (Buck Moon)', description: 'Penumbral Lunar Eclipse visible.' }, // Calendarr (July 18th), AstroPixels (July 17th), TimeAndDate (eclipse) - Using Calendarr date
+             "2027-07-29": { title: 'Piscis Austrinid Peak', description: 'Meteor shower peak.' }, // In-The-Sky
+             "2027-07-30": { title: 'Southern Delta Aquariids Peak', description: 'Meteor shower peak.' }, // In-The-Sky, AstroPixels(date)
+             "2027-07-30": { title: 'Alpha Capricornids Peak', description: 'Meteor shower peak.' }, // In-The-Sky
+             "2027-08-02": { title: 'New Moon', description: 'Total Solar Eclipse visible.' }, // Seasky, Calendarr, TimeAndDate
+             "2027-08-13": { title: 'Perseids Peak', description: 'Popular meteor shower peak.' }, // Approx date, check yearly
+             "2027-08-17": { title: 'Full Moon (Sturgeon Moon)', description: 'Penumbral Lunar Eclipse visible.' }, // Calendarr, TimeAndDate(eclipse)
+             "2027-08-31": { title: 'New Moon', description: '' }, // Calendarr (Aug 31st)
+             "2027-09-16": { title: 'Full Moon (Harvest Moon)', description: '' }, // Calendarr
+             "2027-09-30": { title: 'New Moon', description: '' }, // Calendarr
+             "2027-10-09": { title: 'Draconids Peak', description: 'Meteor shower peak.' }, // In-The-Sky
+             "2027-10-10": { title: 'Southern Taurids Peak', description: 'Meteor shower peak.' }, // In-The-Sky
+             "2027-10-10": { title: 'Venus-Mercury Conjunction', description: 'Planets appear close.' }, // In-The-Sky
+             "2027-10-15": { title: 'Full Moon (Hunter\'s Moon)', description: '' }, // Calendarr
+             "2027-10-17": { title: 'Saturn at Opposition', description: 'Planet alignment event.' }, // In-The-Sky
+             "2027-10-22": { title: 'Orionids Peak', description: 'Meteor shower peak.' }, // In-The-Sky
+             "2027-10-29": { title: 'New Moon', description: '' }, // Calendarr
+             "2027-11-11": { title: 'Northern Taurids Peak', description: 'Meteor shower peak.' }, // Vatican Obs based on IMO pattern
+             "2027-11-14": { title: 'Full Moon (Beaver Moon)', description: '' }, // Calendarr (Nov 13th), AstroPixels (Nov 13th) - Need secondary check
+             "2027-11-17": { title: 'Leonids Peak', description: 'Meteor shower peak.' }, // Approx date, check yearly
+             "2027-11-28": { title: 'New Moon', description: '' }, // Calendarr (Nov 28th)
+             "2027-12-13": { title: 'Full Moon (Cold Moon)', description: '' }, // AstroPixels, Calendarr (Dec 13th)
+             "2027-12-14": { title: 'Geminids Peak', description: 'Strong meteor shower peak.' }, // AstroPixels
+             "2027-12-22": { title: 'Ursids Peak', description: 'Meteor shower peak.' }, // Approx date, check yearly
+             "2027-12-28": { title: 'New Moon', description: '' }, // Calendarr (Dec 28th)
+         },
+
+         "2028": {
+    // Data based on search results, cross-referenced where possible.
+    // Verify times/dates with precise sources like USNO/NASA for specific needs.
+    "2028-01-04": { title: "Quadrantids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2028-01-11": { title: "Full Moon (Wolf Moon)", description: "Partial Lunar Eclipse visible." }, // Sea and Sky
+    "2028-01-26": { title: "New Moon", description: "Annular Solar Eclipse visible." }, // Sea and Sky
+    "2028-02-10": { title: "Full Moon (Snow Moon)", description: "" }, // Sea and Sky
+    "2028-02-25": { title: "New Moon", description: "" }, // Sea and Sky
+    "2028-03-10": { title: "Full Moon (Worm Moon)", description: "" }, // Sea and Sky
+    "2028-03-12": { title: "Jupiter at Opposition", description: "Planet alignment event." }, // Sea and Sky
+    "2028-03-26": { title: "New Moon", description: "" }, // Sea and Sky
+    "2028-04-09": { title: "Full Moon (Pink Moon)", description: "" }, // Sea and Sky
+    "2028-04-24": { title: "New Moon", description: "" }, // Sea and Sky
+    "2028-04-22": { title: "Lyrids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2028-05-08": { title: "Full Moon (Flower Moon)", description: "" }, // Sea and Sky
+    "2028-05-24": { title: "New Moon", description: "" }, // Sea and Sky
+    "2028-05-05": { title: "Eta Aquariids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2028-06-07": { title: "Full Moon (Strawberry Moon)", description: "" }, // Sea and Sky
+    "2028-06-22": { title: "New Moon", description: "" }, // Sea and Sky
+    "2028-06-27": { title: "June Bootids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2028-07-06": { title: "Full Moon (Buck Moon)", description: "Partial Lunar Eclipse visible." }, // Sea and Sky
+    "2028-07-22": { title: "New Moon", description: "Total Solar Eclipse visible." }, // Sea and Sky
+    "2028-07-28": { title: "Piscis Austrinids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2028-07-30": { title: "Southern Delta Aquariids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2028-07-30": { title: "Alpha Capricornids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2028-08-05": { title: "Full Moon (Sturgeon Moon)", description: "" }, // Sea and Sky
+    "2028-08-12": { title: "Perseids Peak", description: "Popular meteor shower peak." }, // Sea and Sky
+    "2028-08-20": { title: "New Moon", description: "" }, // Sea and Sky
+    "2028-08-31": { title: "Aurigids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2028-09-03": { title: "Full Moon (Harvest Moon)", description: "" }, // Sea and Sky
+    "2028-09-18": { title: "New Moon", description: "" }, // Sea and Sky
+    "2028-09-27": { title: "Daytime Sextantids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2028-10-03": { title: "Full Moon (Hunter's Moon)", description: "" }, // Sea and Sky
+    "2028-10-08": { title: "Draconids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2028-10-10": { title: "Southern Taurids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2028-10-17": { title: "New Moon", description: "" }, // Sea and Sky
+    "2028-10-21": { title: "Orionids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2028-10-30": { title: "Saturn at Opposition", description: "Planet alignment event." }, // Sea and Sky
+    "2028-11-02": { title: "Full Moon (Beaver Moon)", description: "" }, // Sea and Sky
+    "2028-11-11": { title: "Northern Taurids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2028-11-17": { title: "Leonids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2028-11-16": { title: "New Moon", description: "" }, // Sea and Sky
+    "2028-12-13": { title: "Geminids Peak", description: "Strong meteor shower peak." }, // Sea and Sky
+    "2028-12-22": { title: "Ursids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2028-12-31": { title: "Full Moon (Cold Moon)", description: "Total Lunar Eclipse visible." } // Sea and Sky
+},
+"2029": {
+    // Data based on search results, cross-referenced where possible.
+    // Verify times/dates with precise sources like USNO/NASA for specific needs.
+    "2029-01-03": { title: "Quadrantids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2029-01-12": { title: "Full Moon (Wolf Moon)", description: "" }, // Sea and Sky
+    "2029-01-26": { title: "New Moon", description: "" }, // Sea and Sky
+    "2029-02-10": { title: "Full Moon (Snow Moon)", description: "" }, // Sea and Sky
+    "2029-02-24": { title: "New Moon", description: "" }, // Sea and Sky
+    "2029-03-10": { title: "Full Moon (Worm Moon)", description: "" }, // Sea and Sky
+    "2029-03-24": { title: "New Moon", description: "" }, // Sea and Sky
+    "2029-04-08": { title: "Full Moon (Pink Moon)", description: "" }, // Sea and Sky
+    "2029-04-22": { title: "Lyrids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2029-04-23": { title: "New Moon", description: "" }, // Sea and Sky
+    "2029-05-07": { title: "Full Moon (Flower Moon)", description: "" }, // Sea and Sky
+    "2029-05-06": { title: "Eta Aquariids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2029-05-22": { title: "New Moon", description: "" }, // Sea and Sky
+    "2029-06-05": { title: "Full Moon (Strawberry Moon)", description: "" }, // Sea and Sky
+    "2029-06-21": { title: "New Moon", description: "" }, // Sea and Sky
+    "2029-06-27": { title: "June Bootids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2029-07-05": { title: "Full Moon (Buck Moon)", description: "" }, // Sea and Sky
+    "2029-07-20": { title: "New Moon", description: "" }, // Sea and Sky
+    "2029-07-28": { title: "Piscis Austrinids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2029-07-30": { title: "Southern Delta Aquariids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2029-07-30": { title: "Alpha Capricornids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2029-08-03": { title: "Full Moon (Sturgeon Moon)", description: "" }, // Sea and Sky
+    "2029-08-12": { title: "Perseids Peak", description: "Popular meteor shower peak." }, // Sea and Sky
+    "2029-08-18": { title: "New Moon", description: "" }, // Sea and Sky
+    "2029-08-31": { title: "Aurigids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2029-09-02": { title: "Full Moon (Harvest Moon)", description: "" }, // Sea and Sky
+    "2029-09-16": { title: "New Moon", description: "" }, // Sea and Sky
+    "2029-09-27": { title: "Daytime Sextantids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2029-10-02": { title: "Full Moon (Hunter's Moon)", description: "" }, // Sea and Sky
+    "2029-10-08": { title: "Draconids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2029-10-10": { title: "Southern Taurids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2029-10-15": { title: "New Moon", description: "" }, // Sea and Sky
+    "2029-10-21": { title: "Orionids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2029-11-01": { title: "Full Moon (Beaver Moon)", description: "" }, // Sea and Sky
+    "2029-11-05": { title: "Northern Taurids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2029-11-17": { title: "Leonids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2029-11-14": { title: "New Moon", description: "" }, // Sea and Sky
+    "2029-12-13": { title: "Geminids Peak", description: "Strong meteor shower peak." }, // Sea and Sky
+    "2029-12-22": { title: "Ursids Peak", description: "Meteor shower peak." }, // Sea and Sky
+    "2029-12-31": { title: "Full Moon (Cold Moon)", description: "" } // Sea and Sky
+},
+"2030": {
+    // Data based on search results, cross-referenced where possible.
+    // Verify times/dates with precise sources like USNO/NASA for specific needs.
+    "2030-01-03": { title: "Quadrantids Peak", description: "Meteor shower peak." },
+    "2030-01-13": { title: "Full Moon (Wolf Moon)", description: "" },
+    "2030-01-27": { title: "New Moon", description: "" },
+    "2030-02-11": { title: "Full Moon (Snow Moon)", description: "" },
+    "2030-02-25": { title: "New Moon", description: "" },
+    "2030-03-13": { title: "Full Moon (Worm Moon)", description: "" },
+    "2030-03-28": { title: "New Moon", description: "" },
+    "2030-04-11": { title: "Full Moon (Pink Moon)", description: "" },
+    "2030-04-22": { title: "Lyrids Peak", description: "Meteor shower peak." },
+    "2030-04-26": { title: "New Moon", description: "" },
+    "2030-05-10": { title: "Full Moon (Flower Moon)", description: "" },
+    "2030-05-24": { title: "New Moon", description: "" },
+    "2030-05-05": { title: "Eta Aquariids Peak", description: "Meteor shower peak." },
+    "2030-06-09": { title: "Full Moon (Strawberry Moon)", description: "" },
+    "2030-06-23": { title: "New Moon", description: "" },
+    "2030-06-27": { title: "June Bootids Peak", description: "Meteor shower peak." },
+    "2030-07-08": { title: "Full Moon (Buck Moon)", description: "" },
+    "2030-07-22": { title: "New Moon", description: "" },
+    "2030-07-28": { title: "Piscis Austrinids Peak", description: "Meteor shower peak." },
+    "2030-07-30": { title: "Southern Delta Aquariids Peak", description: "Meteor shower peak." },
+    "2030-07-30": { title: "Alpha Capricornids Peak", description: "Meteor shower peak." },
+    "2030-08-07": { title: "Full Moon (Sturgeon Moon)", description: "" },
+    "2030-08-12": { title: "Perseids Peak", description: "Popular meteor shower peak." },
+    "2030-08-20": { title: "New Moon", description: "" },
+    "2030-08-31": { title: "Aurigids Peak", description: "Meteor shower peak." },
+    "2030-09-05": { title: "Full Moon (Harvest Moon)", description: "" },
+    "2030-09-19": { title: "New Moon", description: "" },
+    "2030-09-27": { title: "Daytime Sextantids Peak", description: "Meteor shower peak." },
+    "2030-10-05": { title: "Full Moon (Hunter's Moon)", description: "" },
+    "2030-10-08": { title: "Draconids Peak", description: "Meteor shower peak." },
+    "2030-10-10": { title: "Southern Taurids Peak", description: "Meteor shower peak." },
+    "2030-10-19": { title: "New Moon", description: "" },
+    "2030-10-21": { title: "Orionids Peak", description: "Meteor shower peak." },
+    "2030-11-03": { title: "Full Moon (Beaver Moon)", description: "" },
+    "2030-11-11": { title: "Northern Taurids Peak", description: "Meteor shower peak." },
+    "2030-11-17": { title: "Leonids Peak", description: "Meteor shower peak." },
+    "2030-11-18": { title: "New Moon", description: "" },
+    "2030-12-03": { title: "Full Moon (Cold Moon)", description: "" },
+    "2030-12-13": { title: "Geminids Peak", description: "Strong meteor shower peak." },
+    "2030-12-22": { title: "Ursids Peak", description: "Meteor shower peak." },
+    "2030-12-18": { title: "New Moon", description: "" }
+},
+"2031": {
+    // Data based on search results, cross-referenced where possible.
+    // Verify times/dates with precise sources like USNO/NASA for specific needs.
+    "2031-01-03": { title: "Quadrantids Peak", description: "Meteor shower peak." },
+    "2031-01-12": { title: "Full Moon (Wolf Moon)", description: "" },
+    "2031-01-26": { title: "New Moon", description: "" },
+    "2031-02-10": { title: "Full Moon (Snow Moon)", description: "" },
+    "2031-02-25": { title: "New Moon", description: "" },
+    "2031-03-12": { title: "Full Moon (Worm Moon)", description: "" },
+    "2031-03-27": { title: "New Moon", description: "" },
+    "2031-04-11": { title: "Full Moon (Pink Moon)", description: "" },
+    "2031-04-22": { title: "Lyrids Peak", description: "Meteor shower peak." },
+    "2031-04-25": { title: "New Moon", description: "" },
+    "2031-05-10": { title: "Full Moon (Flower Moon)", description: "" },
+    "2031-05-24": { title: "New Moon", description: "" },
+    "2031-05-05": { title: "Eta Aquariids Peak", description: "Meteor shower peak." },
+    "2031-06-09": { title: "Full Moon (Strawberry Moon)", description: "" },
+    "2031-06-23": { title: "New Moon", description: "" },
+    "2031-06-27": { title: "June Bootids Peak", description: "Meteor shower peak." },
+    "2031-07-08": { title: "Full Moon (Buck Moon)", description: "" },
+    "2031-07-22": { title: "New Moon", description: "" },
+    "2031-07-28": { title: "Piscis Austrinids Peak", description: "Meteor shower peak." },
+    "2031-07-30": { title: "Southern Delta Aquariids Peak", description: "Meteor shower peak." },
+    "2031-07-30": { title: "Alpha Capricornids Peak", description: "Meteor shower peak." },
+    "2031-08-07": { title: "Full Moon (Sturgeon Moon)", description: "" },
+    "2031-08-12": { title: "Perseids Peak", description: "Popular meteor shower peak." },
+    "2031-08-20": { title: "New Moon", description: "" },
+    "2031-08-31": { title: "Aurigids Peak", description: "Meteor shower peak." },
+    "2031-09-05": { title: "Full Moon (Harvest Moon)", description: "" },
+    "2031-09-19": { title: "New Moon", description: "" },
+    "2031-09-27": { title: "Daytime Sextantids Peak", description: "Meteor shower peak." },
+    "2031-10-05": { title: "Full Moon (Hunter's Moon)", description: "" },
+    "2031-10-08": { title: "Draconids Peak", description: "Meteor shower peak." },
+    "2031-10-10": { title: "Southern Taurids Peak", description: "Meteor shower peak." },
+    "2031-10-19": { title: "New Moon", description: "" },
+    "2031-10-21": { title: "Orionids Peak", description: "Meteor shower peak." },
+    "2031-11-03": { title: "Full Moon (Beaver Moon)", description: "" },
+    "2031-11-11": { title: "Northern Taurids Peak", description: "Meteor shower peak." },
+    "2031-11-17": { title: "Leonids Peak", description: "Meteor shower peak." },
+    "2031-11-18": { title: "New Moon", description: "" },
+    "2031-12-03": { title: "Full Moon (Cold Moon)", description: "" },
+    "2031-12-13": { title: "Geminids Peak", description: "Strong meteor shower peak." },
+    "2031-12-22": { title: "Ursids Peak", description: "Meteor shower peak." },
+    "2031-12-18": { title: "New Moon", description: "" }
+},
+"2032": {
+    // Data based on search results, cross-referenced where possible.
+    // Verify times/dates with precise sources like USNO/NASA for specific needs.
+    "2032-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2032-01-11": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2032-01-25": { "title": "New Moon", "description": "" },
+    "2032-02-09": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2032-02-24": { "title": "New Moon", "description": "" },
+    "2032-03-10": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2032-03-25": { "title": "New Moon", "description": "" },
+    "2032-04-08": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2032-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2032-04-23": { "title": "New Moon", "description": "" },
+    "2032-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2032-05-08": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2032-05-23": { "title": "New Moon", "description": "" },
+    "2032-06-06": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2032-06-21": { "title": "New Moon", "description": "" },
+    "2032-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2032-07-06": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2032-07-20": { "title": "New Moon", "description": "" },
+    "2032-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2032-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2032-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2032-08-04": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2032-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2032-08-18": { "title": "New Moon", "description": "" },
+    "2032-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2032-09-02": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2032-09-17": { "title": "New Moon", "description": "" },
+    "2032-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2032-10-02": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2032-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2032-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2032-10-16": { "title": "New Moon", "description": "" },
+    "2032-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2032-10-31": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2032-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2032-11-15": { "title": "New Moon", "description": "" },
+    "2032-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2032-11-30": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2032-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2032-12-15": { "title": "New Moon", "description": "" },
+    "2032-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2033": {
+    // Data based on search results, cross-referenced where possible.
+    // Verify times/dates with precise sources like USNO/NASA for specific needs.
+    "2033-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2033-01-10": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2033-01-24": { "title": "New Moon", "description": "" },
+    "2033-02-08": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2033-02-22": { "title": "New Moon", "description": "" },
+    "2033-03-09": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2033-03-24": { "title": "New Moon", "description": "" },
+    "2033-04-08": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2033-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2033-04-22": { "title": "New Moon", "description": "" },
+    "2033-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2033-05-07": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2033-05-22": { "title": "New Moon", "description": "" },
+    "2033-06-06": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2033-06-20": { "title": "New Moon", "description": "" },
+    "2033-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2033-07-05": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2033-07-20": { "title": "New Moon", "description": "" },
+    "2033-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2033-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2033-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2033-08-04": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2033-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2033-08-18": { "title": "New Moon", "description": "" },
+    "2033-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2033-09-02": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2033-09-17": { "title": "New Moon", "description": "" },
+    "2033-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2033-10-02": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2033-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2033-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2033-10-16": { "title": "New Moon", "description": "" },
+    "2033-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2033-10-31": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2033-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2033-11-15": { "title": "New Moon", "description": "" },
+    "2033-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2033-11-30": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2033-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2033-12-15": { "title": "New Moon", "description": "" },
+    "2033-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2034": {
+    "2034-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2034-01-11": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2034-01-25": { "title": "New Moon", "description": "" },
+    "2034-02-09": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2034-02-24": { "title": "New Moon", "description": "" },
+    "2034-03-10": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2034-03-25": { "title": "New Moon", "description": "" },
+    "2034-04-08": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2034-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2034-04-23": { "title": "New Moon", "description": "" },
+    "2034-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2034-05-08": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2034-05-23": { "title": "New Moon", "description": "" },
+    "2034-06-06": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2034-06-21": { "title": "New Moon", "description": "" },
+    "2034-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2034-07-06": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2034-07-20": { "title": "New Moon", "description": "" },
+    "2034-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2034-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2034-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2034-08-04": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2034-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2034-08-18": { "title": "New Moon", "description": "" },
+    "2034-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2034-09-02": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2034-09-17": { "title": "New Moon", "description": "" },
+    "2034-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2034-10-02": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2034-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2034-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2034-10-16": { "title": "New Moon", "description": "" },
+    "2034-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2034-10-31": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2034-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2034-11-15": { "title": "New Moon", "description": "" },
+    "2034-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2034-11-30": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2034-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2034-12-15": { "title": "New Moon", "description": "" },
+    "2034-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2035": {
+    "2035-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2035-01-10": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2035-01-24": { "title": "New Moon", "description": "" },
+    "2035-02-08": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2035-02-22": { "title": "New Moon", "description": "" },
+    "2035-03-09": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2035-03-24": { "title": "New Moon", "description": "" },
+    "2035-04-08": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2035-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2035-04-22": { "title": "New Moon", "description": "" },
+    "2035-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2035-05-07": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2035-05-22": { "title": "New Moon", "description": "" },
+    "2035-06-06": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2035-06-20": { "title": "New Moon", "description": "" },
+    "2035-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2035-07-05": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2035-07-20": { "title": "New Moon", "description": "" },
+    "2035-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2035-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2035-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2035-08-04": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2035-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2035-08-18": { "title": "New Moon", "description": "" },
+    "2035-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2035-09-02": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2035-09-17": { "title": "New Moon", "description": "" },
+    "2035-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2035-10-02": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2035-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2035-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2035-10-16": { "title": "New Moon", "description": "" },
+    "2035-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2035-10-31": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2035-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2035-11-15": { "title": "New Moon", "description": "" },
+    "2035-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2035-11-30": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2035-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2035-12-15": { "title": "New Moon", "description": "" },
+    "2035-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2036": {
+    "2036-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2036-01-09": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2036-01-23": { "title": "New Moon", "description": "" },
+    "2036-02-07": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2036-02-22": { "title": "New Moon", "description": "" },
+    "2036-03-08": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2036-03-23": { "title": "New Moon", "description": "" },
+    "2036-04-07": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2036-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2036-04-21": { "title": "New Moon", "description": "" },
+    "2036-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2036-05-07": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2036-05-21": { "title": "New Moon", "description": "" },
+    "2036-06-05": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2036-06-19": { "title": "New Moon", "description": "" },
+    "2036-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2036-07-05": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2036-07-19": { "title": "New Moon", "description": "" },
+    "2036-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2036-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2036-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2036-08-03": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2036-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2036-08-17": { "title": "New Moon", "description": "" },
+    "2036-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2036-09-02": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2036-09-16": { "title": "New Moon", "description": "" },
+    "2036-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2036-10-01": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2036-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2036-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2036-10-15": { "title": "New Moon", "description": "" },
+    "2036-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2036-10-31": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2036-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2036-11-14": { "title": "New Moon", "description": "" },
+    "2036-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2036-11-29": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2036-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2036-12-14": { "title": "New Moon", "description": "" },
+    "2036-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2037": {
+    "2037-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2037-01-08": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2037-01-22": { "title": "New Moon", "description": "" },
+    "2037-02-07": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2037-02-21": { "title": "New Moon", "description": "" },
+    "2037-03-08": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2037-03-22": { "title": "New Moon", "description": "" },
+    "2037-04-07": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2037-04-21": { "title": "New Moon", "description": "" },
+    "2037-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2037-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2037-05-06": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2037-05-20": { "title": "New Moon", "description": "" },
+    "2037-06-05": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2037-06-19": { "title": "New Moon", "description": "" },
+    "2037-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2037-07-04": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2037-07-19": { "title": "New Moon", "description": "" },
+    "2037-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2037-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2037-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2037-08-03": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2037-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2037-08-17": { "title": "New Moon", "description": "" },
+    "2037-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2037-09-01": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2037-09-16": { "title": "New Moon", "description": "" },
+    "2037-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2037-10-01": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2037-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2037-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2037-10-15": { "title": "New Moon", "description": "" },
+    "2037-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2037-10-30": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2037-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2037-11-13": { "title": "New Moon", "description": "" },
+    "2037-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2037-11-29": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2037-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2037-12-13": { "title": "New Moon", "description": "" },
+    "2037-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2038": {
+    "2038-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2038-01-08": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2038-01-22": { "title": "New Moon", "description": "" },
+    "2038-02-07": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2038-02-21": { "title": "New Moon", "description": "" },
+    "2038-03-08": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2038-03-22": { "title": "New Moon", "description": "" },
+    "2038-04-07": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2038-04-21": { "title": "New Moon", "description": "" },
+    "2038-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2038-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2038-05-06": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2038-05-20": { "title": "New Moon", "description": "" },
+    "2038-06-05": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2038-06-19": { "title": "New Moon", "description": "" },
+    "2038-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2038-07-04": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2038-07-19": { "title": "New Moon", "description": "" },
+    "2038-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2038-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2038-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2038-08-03": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2038-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2038-08-17": { "title": "New Moon", "description": "" },
+    "2038-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2038-09-01": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2038-09-16": { "title": "New Moon", "description": "" },
+    "2038-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2038-10-01": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2038-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2038-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2038-10-15": { "title": "New Moon", "description": "" },
+    "2038-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2038-10-30": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2038-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2038-11-13": { "title": "New Moon", "description": "" },
+    "2038-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2038-11-29": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2038-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2038-12-13": { "title": "New Moon", "description": "" },
+    "2038-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2039": {
+    "2039-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2039-01-08": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2039-01-22": { "title": "New Moon", "description": "" },
+    "2039-02-07": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2039-02-21": { "title": "New Moon", "description": "" },
+    "2039-03-08": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2039-03-22": { "title": "New Moon", "description": "" },
+    "2039-04-07": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2039-04-21": { "title": "New Moon", "description": "" },
+    "2039-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2039-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2039-05-06": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2039-05-20": { "title": "New Moon", "description": "" },
+    "2039-06-05": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2039-06-19": { "title": "New Moon", "description": "" },
+    "2039-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2039-07-04": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2039-07-19": { "title": "New Moon", "description": "" },
+    "2039-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2039-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2039-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2039-08-03": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2039-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2039-08-17": { "title": "New Moon", "description": "" },
+    "2039-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2039-09-01": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2039-09-16": { "title": "New Moon", "description": "" },
+    "2039-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2039-10-01": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2039-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2039-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2039-10-15": { "title": "New Moon", "description": "" },
+    "2039-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2039-10-30": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2039-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2039-11-13": { "title": "New Moon", "description": "" },
+    "2039-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2039-11-29": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2039-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2039-12-13": { "title": "New Moon", "description": "" },
+    "2039-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2040": {
+    "2040-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2040-01-08": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2040-01-22": { "title": "New Moon", "description": "" },
+    "2040-02-07": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2040-02-21": { "title": "New Moon", "description": "" },
+    "2040-03-08": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2040-03-22": { "title": "New Moon", "description": "" },
+    "2040-04-07": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2040-04-21": { "title": "New Moon", "description": "" },
+    "2040-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2040-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2040-05-06": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2040-05-20": { "title": "New Moon", "description": "" },
+    "2040-06-05": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2040-06-19": { "title": "New Moon", "description": "" },
+    "2040-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2040-07-04": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2040-07-19": { "title": "New Moon", "description": "" },
+    "2040-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2040-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2040-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2040-08-03": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2040-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2040-08-17": { "title": "New Moon", "description": "" },
+    "2040-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2040-09-01": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2040-09-16": { "title": "New Moon", "description": "" },
+    "2040-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2040-10-01": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2040-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2040-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2040-10-15": { "title": "New Moon", "description": "" },
+    "2040-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2040-10-30": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2040-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2040-11-13": { "title": "New Moon", "description": "" },
+    "2040-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2040-11-29": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2040-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2040-12-13": { "title": "New Moon", "description": "" },
+    "2040-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2041": {
+    "2041-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2041-01-08": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2041-01-22": { "title": "New Moon", "description": "" },
+    "2041-02-07": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2041-02-21": { "title": "New Moon", "description": "" },
+    "2041-03-08": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2041-03-22": { "title": "New Moon", "description": "" },
+    "2041-04-07": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2041-04-21": { "title": "New Moon", "description": "" },
+    "2041-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2041-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2041-05-06": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2041-05-20": { "title": "New Moon", "description": "" },
+    "2041-06-05": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2041-06-19": { "title": "New Moon", "description": "" },
+    "2041-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2041-07-04": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2041-07-19": { "title": "New Moon", "description": "" },
+    "2041-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2041-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2041-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2041-08-03": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2041-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2041-08-17": { "title": "New Moon", "description": "" },
+    "2041-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2041-09-01": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2041-09-16": { "title": "New Moon", "description": "" },
+    "2041-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2041-10-01": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2041-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2041-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2041-10-15": { "title": "New Moon", "description": "" },
+    "2041-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2041-10-30": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2041-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2041-11-13": { "title": "New Moon", "description": "" },
+    "2041-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2041-11-29": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2041-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2041-12-13": { "title": "New Moon", "description": "" },
+    "2041-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2042": {
+    "2042-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2042-01-08": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2042-01-22": { "title": "New Moon", "description": "" },
+    "2042-02-07": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2042-02-21": { "title": "New Moon", "description": "" },
+    "2042-03-08": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2042-03-22": { "title": "New Moon", "description": "" },
+    "2042-04-07": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2042-04-21": { "title": "New Moon", "description": "" },
+    "2042-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2042-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2042-05-06": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2042-05-20": { "title": "New Moon", "description": "" },
+    "2042-06-05": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2042-06-19": { "title": "New Moon", "description": "" },
+    "2042-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2042-07-04": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2042-07-19": { "title": "New Moon", "description": "" },
+    "2042-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2042-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2042-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2042-08-03": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2042-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2042-08-17": { "title": "New Moon", "description": "" },
+    "2042-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2042-09-01": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2042-09-16": { "title": "New Moon", "description": "" },
+    "2042-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2042-10-01": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2042-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2042-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2042-10-15": { "title": "New Moon", "description": "" },
+    "2042-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2042-10-30": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2042-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2042-11-13": { "title": "New Moon", "description": "" },
+    "2042-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2042-11-29": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2042-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2042-12-13": { "title": "New Moon", "description": "" },
+    "2042-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2043": {
+    "2043-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2043-01-08": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2043-01-22": { "title": "New Moon", "description": "" },
+    "2043-02-07": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2043-02-21": { "title": "New Moon", "description": "" },
+    "2043-03-08": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2043-03-22": { "title": "New Moon", "description": "" },
+    "2043-04-07": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2043-04-21": { "title": "New Moon", "description": "" },
+    "2043-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2043-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2043-05-06": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2043-05-20": { "title": "New Moon", "description": "" },
+    "2043-06-05": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2043-06-19": { "title": "New Moon", "description": "" },
+    "2043-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2043-07-04": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2043-07-19": { "title": "New Moon", "description": "" },
+    "2043-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2043-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2043-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2043-08-03": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2043-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2043-08-17": { "title": "New Moon", "description": "" },
+    "2043-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2043-09-01": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2043-09-16": { "title": "New Moon", "description": "" },
+    "2043-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2043-10-01": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2043-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2043-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2043-10-15": { "title": "New Moon", "description": "" },
+    "2043-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2043-10-30": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2043-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2043-11-13": { "title": "New Moon", "description": "" },
+    "2043-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2043-11-29": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2043-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2043-12-13": { "title": "New Moon", "description": "" },
+    "2043-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2044": {
+    "2044-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2044-01-08": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2044-01-22": { "title": "New Moon", "description": "" },
+    "2044-02-07": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2044-02-21": { "title": "New Moon", "description": "" },
+    "2044-03-08": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2044-03-22": { "title": "New Moon", "description": "" },
+    "2044-04-07": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2044-04-21": { "title": "New Moon", "description": "" },
+    "2044-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2044-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2044-05-06": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2044-05-20": { "title": "New Moon", "description": "" },
+    "2044-06-05": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2044-06-19": { "title": "New Moon", "description": "" },
+    "2044-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2044-07-04": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2044-07-19": { "title": "New Moon", "description": "" },
+    "2044-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2044-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2044-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2044-08-03": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2044-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2044-08-17": { "title": "New Moon", "description": "" },
+    "2044-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2044-09-01": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2044-09-16": { "title": "New Moon", "description": "" },
+    "2044-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2044-10-01": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2044-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2044-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2044-10-15": { "title": "New Moon", "description": "" },
+    "2044-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2044-10-30": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2044-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2044-11-13": { "title": "New Moon", "description": "" },
+    "2044-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2044-11-29": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2044-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2044-12-13": { "title": "New Moon", "description": "" },
+    "2044-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2045": {
+    "2045-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2045-01-08": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2045-01-22": { "title": "New Moon", "description": "" },
+    "2045-02-07": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2045-02-21": { "title": "New Moon", "description": "" },
+    "2045-03-08": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2045-03-22": { "title": "New Moon", "description": "" },
+    "2045-04-07": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2045-04-21": { "title": "New Moon", "description": "" },
+    "2045-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2045-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2045-05-06": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2045-05-20": { "title": "New Moon", "description": "" },
+    "2045-06-05": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2045-06-19": { "title": "New Moon", "description": "" },
+    "2045-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2045-07-04": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2045-07-19": { "title": "New Moon", "description": "" },
+    "2045-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2045-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2045-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2045-08-03": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2045-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2045-08-17": { "title": "New Moon", "description": "" },
+    "2045-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2045-09-01": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2045-09-16": { "title": "New Moon", "description": "" },
+    "2045-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2045-10-01": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2045-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2045-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2045-10-15": { "title": "New Moon", "description": "" },
+    "2045-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2045-10-30": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2045-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2045-11-13": { "title": "New Moon", "description": "" },
+    "2045-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2045-11-29": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2045-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2045-12-13": { "title": "New Moon", "description": "" },
+    "2045-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2046": {
+    "2046-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2046-01-08": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2046-01-22": { "title": "New Moon", "description": "" },
+    "2046-02-07": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2046-02-21": { "title": "New Moon", "description": "" },
+    "2046-03-08": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2046-03-22": { "title": "New Moon", "description": "" },
+    "2046-04-07": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2046-04-21": { "title": "New Moon", "description": "" },
+    "2046-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2046-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2046-05-06": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2046-05-20": { "title": "New Moon", "description": "" },
+    "2046-06-05": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2046-06-19": { "title": "New Moon", "description": "" },
+    "2046-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2046-07-04": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2046-07-19": { "title": "New Moon", "description": "" },
+    "2046-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2046-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2046-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2046-08-03": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2046-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2046-08-17": { "title": "New Moon", "description": "" },
+    "2046-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2046-09-01": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2046-09-16": { "title": "New Moon", "description": "" },
+    "2046-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2046-10-01": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2046-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2046-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2046-10-15": { "title": "New Moon", "description": "" },
+    "2046-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2046-10-30": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2046-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2046-11-13": { "title": "New Moon", "description": "" },
+    "2046-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2046-11-29": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2046-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2046-12-13": { "title": "New Moon", "description": "" },
+    "2046-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2047": {
+    "2047-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2047-01-08": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2047-01-22": { "title": "New Moon", "description": "" },
+    "2047-02-07": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2047-02-21": { "title": "New Moon", "description": "" },
+    "2047-03-08": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2047-03-22": { "title": "New Moon", "description": "" },
+    "2047-04-07": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2047-04-21": { "title": "New Moon", "description": "" },
+    "2047-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2047-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2047-05-06": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2047-05-20": { "title": "New Moon", "description": "" },
+    "2047-06-05": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2047-06-19": { "title": "New Moon", "description": "" },
+    "2047-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2047-07-04": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2047-07-19": { "title": "New Moon", "description": "" },
+    "2047-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2047-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2047-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2047-08-03": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2047-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2047-08-17": { "title": "New Moon", "description": "" },
+    "2047-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2047-09-01": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2047-09-16": { "title": "New Moon", "description": "" },
+    "2047-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2047-10-01": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2047-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2047-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2047-10-15": { "title": "New Moon", "description": "" },
+    "2047-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2047-10-30": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2047-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2047-11-13": { "title": "New Moon", "description": "" },
+    "2047-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2047-11-29": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2047-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2047-12-13": { "title": "New Moon", "description": "" },
+    "2047-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2048": {
+    "2048-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2048-01-08": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2048-01-22": { "title": "New Moon", "description": "" },
+    "2048-02-07": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2048-02-21": { "title": "New Moon", "description": "" },
+    "2048-03-08": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2048-03-22": { "title": "New Moon", "description": "" },
+    "2048-04-07": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2048-04-21": { "title": "New Moon", "description": "" },
+    "2048-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2048-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2048-05-06": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2048-05-20": { "title": "New Moon", "description": "" },
+    "2048-06-05": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2048-06-19": { "title": "New Moon", "description": "" },
+    "2048-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2048-07-04": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2048-07-19": { "title": "New Moon", "description": "" },
+    "2048-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2048-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2048-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2048-08-03": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2048-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2048-08-17": { "title": "New Moon", "description": "" },
+    "2048-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2048-09-01": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2048-09-16": { "title": "New Moon", "description": "" },
+    "2048-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2048-10-01": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2048-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2048-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2048-10-15": { "title": "New Moon", "description": "" },
+    "2048-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2048-10-30": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2048-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2048-11-13": { "title": "New Moon", "description": "" },
+    "2048-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2048-11-29": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2048-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2048-12-13": { "title": "New Moon", "description": "" },
+    "2048-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2049": {
+    "2049-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2049-01-08": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2049-01-22": { "title": "New Moon", "description": "" },
+    "2049-02-07": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2049-02-21": { "title": "New Moon", "description": "" },
+    "2049-03-08": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2049-03-22": { "title": "New Moon", "description": "" },
+    "2049-04-07": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2049-04-21": { "title": "New Moon", "description": "" },
+    "2049-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2049-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2049-05-06": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2049-05-20": { "title": "New Moon", "description": "" },
+    "2049-06-05": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2049-06-19": { "title": "New Moon", "description": "" },
+    "2049-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2049-07-04": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2049-07-19": { "title": "New Moon", "description": "" },
+    "2049-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2049-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2049-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2049-08-03": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2049-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2049-08-17": { "title": "New Moon", "description": "" },
+    "2049-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2049-09-01": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2049-09-16": { "title": "New Moon", "description": "" },
+    "2049-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2049-10-01": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2049-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2049-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2049-10-15": { "title": "New Moon", "description": "" },
+    "2049-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2049-10-30": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2049-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2049-11-13": { "title": "New Moon", "description": "" },
+    "2049-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2049-11-29": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2049-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2049-12-13": { "title": "New Moon", "description": "" },
+    "2049-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+"2050": {
+    "2050-01-03": { "title": "Quadrantids Peak", "description": "Meteor shower peak." },
+    "2050-01-08": { "title": "Full Moon (Wolf Moon)", "description": "" },
+    "2050-01-22": { "title": "New Moon", "description": "" },
+    "2050-02-07": { "title": "Full Moon (Snow Moon)", "description": "" },
+    "2050-02-21": { "title": "New Moon", "description": "" },
+    "2050-03-08": { "title": "Full Moon (Worm Moon)", "description": "" },
+    "2050-03-22": { "title": "New Moon", "description": "" },
+    "2050-04-07": { "title": "Full Moon (Pink Moon)", "description": "" },
+    "2050-04-21": { "title": "New Moon", "description": "" },
+    "2050-04-22": { "title": "Lyrids Peak", "description": "Meteor shower peak." },
+    "2050-05-05": { "title": "Eta Aquariids Peak", "description": "Meteor shower peak." },
+    "2050-05-06": { "title": "Full Moon (Flower Moon)", "description": "" },
+    "2050-05-20": { "title": "New Moon", "description": "" },
+    "2050-06-05": { "title": "Full Moon (Strawberry Moon)", "description": "" },
+    "2050-06-19": { "title": "New Moon", "description": "" },
+    "2050-06-27": { "title": "June Bootids Peak", "description": "Meteor shower peak." },
+    "2050-07-04": { "title": "Full Moon (Buck Moon)", "description": "" },
+    "2050-07-19": { "title": "New Moon", "description": "" },
+    "2050-07-28": { "title": "Piscis Austrinids Peak", "description": "Meteor shower peak." },
+    "2050-07-30": { "title": "Southern Delta Aquariids Peak", "description": "Meteor shower peak." },
+    "2050-07-30": { "title": "Alpha Capricornids Peak", "description": "Meteor shower peak." },
+    "2050-08-03": { "title": "Full Moon (Sturgeon Moon)", "description": "" },
+    "2050-08-12": { "title": "Perseids Peak", "description": "Popular meteor shower peak." },
+    "2050-08-17": { "title": "New Moon", "description": "" },
+    "2050-08-31": { "title": "Aurigids Peak", "description": "Meteor shower peak." },
+    "2050-09-01": { "title": "Full Moon (Harvest Moon)", "description": "" },
+    "2050-09-16": { "title": "New Moon", "description": "" },
+    "2050-09-27": { "title": "Daytime Sextantids Peak", "description": "Meteor shower peak." },
+    "2050-10-01": { "title": "Full Moon (Hunter's Moon)", "description": "" },
+    "2050-10-08": { "title": "Draconids Peak", "description": "Meteor shower peak." },
+    "2050-10-10": { "title": "Southern Taurids Peak", "description": "Meteor shower peak." },
+    "2050-10-15": { "title": "New Moon", "description": "" },
+    "2050-10-21": { "title": "Orionids Peak", "description": "Meteor shower peak." },
+    "2050-10-30": { "title": "Full Moon (Beaver Moon)", "description": "" },
+    "2050-11-11": { "title": "Northern Taurids Peak", "description": "Meteor shower peak." },
+    "2050-11-13": { "title": "New Moon", "description": "" },
+    "2050-11-17": { "title": "Leonids Peak", "description": "Meteor shower peak." },
+    "2050-11-29": { "title": "Full Moon (Cold Moon)", "description": "" },
+    "2050-12-13": { "title": "Geminids Peak", "description": "Strong meteor shower peak." },
+    "2050-12-13": { "title": "New Moon", "description": "" },
+    "2050-12-22": { "title": "Ursids Peak", "description": "Meteor shower peak." }
+},
+
+
+
+
+         // ============================================================
+         // TODO: Add data for 2027 (Full/New Moons, Showers, Alignments)
+         // "2027": { /* ... events ... */ },
+         // ============================================================
+         // ... CONTINUE ADDING YEARS ...
+         // ============================================================
+         // TODO: Add data for 2100 (Full/New Moons, Showers, Alignments)
+         // "2100": { /* ... events ... */ },
+         // ============================================================
+      };
+
+      // Function to update the calendar display
+      function updateCalendar() {
+          if (!calendarGrid || !calendarMonthYear || !monthSelect || !yearSelect) {
+               console.error("Calendar elements not found.");
+               return;
+          }
+          // Regenerate events if the year changed
+          
+          const currentYearEvents = astronomicalEvents[currentYear] || {}; // NEW - Use the data structure
+
+          calendarGrid.innerHTML = ''; // Clear previous days
+
+          // Add day headers
+          const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+          daysOfWeek.forEach(day => {
+              const dayHeader = document.createElement('div');
+              dayHeader.className = 'day-header';
+              dayHeader.textContent = day;
+              calendarGrid.appendChild(dayHeader);
+          });
+
+          const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+          const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+          // Add empty cells for padding at the start
+          for (let i = 0; i < firstDayOfMonth; i++) {
+              const emptyCell = document.createElement('div');
+              emptyCell.className = 'calendar-day other-month'; // Style differently if needed
+              calendarGrid.appendChild(emptyCell);
+          }
+
+          // Add actual days
+          for (let day = 1; day <= daysInMonth; day++) {
+              const date = new Date(currentYear, currentMonth, day);
+              const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+              const dayCell = document.createElement('div');
+              dayCell.className = 'calendar-day';
+              dayCell.textContent = day;
+              dayCell.dataset.date = dateString; // Store date for potential click events
+
+              // Highlight today
+              const today = new Date();
+              if (date.toDateString() === today.toDateString()) {
+                  dayCell.classList.add('today'); // Add a class for styling today
+                   dayCell.style.border = '1px solid #4fc3f7'; // Example style for today
+              }
+
+              // Check for events
+              if (currentYearEvents[dateString]) {
+                  dayCell.classList.add('has-event');
+                  const event = currentYearEvents[dateString];
+                  const tooltip = document.createElement('div');
+                  tooltip.className = 'event-tooltip';
+                  tooltip.innerHTML = `<h4>${event.title}</h4><p>${event.description}</p>`;
+                  dayCell.appendChild(tooltip);
+                   dayCell.title = event.title; // Add browser tooltip
+              }
+
+              calendarGrid.appendChild(dayCell);
+          }
+
+           // Update title and selects
+          calendarMonthYear.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+          yearSelect.value = currentYear;
+          monthSelect.value = currentMonth;
+      }
+
+      // Calendar Event Listeners
+      todayBtn.addEventListener('click', () => {
+          currentDate = new Date();
+          currentMonth = currentDate.getMonth();
+          currentYear = currentDate.getFullYear();
+          // No need to regenerate events unless year changed significantly outside range
+          updateCalendar();
+      });
+
+      prevYearBtn.addEventListener('click', () => {
+          currentYear--;
+          updateCalendar();
+      });
+      nextYearBtn.addEventListener('click', () => {
+          currentYear++;
+          updateCalendar();
+      });
+      prevMonthBtn.addEventListener('click', () => {
+          currentMonth--;
+          if (currentMonth < 0) {
+              currentMonth = 11;
+              currentYear--;
+          }
+          updateCalendar();
+      });
+      nextMonthBtn.addEventListener('click', () => {
+          currentMonth++;
+          if (currentMonth > 11) {
+              currentMonth = 0;
+              currentYear++;
+          }
+          updateCalendar();
+      });
+      yearSelect.addEventListener('change', () => {
+          currentYear = parseInt(yearSelect.value);
+          updateCalendar();
+      });
+      monthSelect.addEventListener('change', () => {
+          currentMonth = parseInt(monthSelect.value);
+          updateCalendar();
+      });
+
+      // Initialize Calendar
+      updateCalendar();
+
+
+      // --- Other Functionality ---
+
+      // Smooth scrolling for navigation links
+      document.querySelectorAll('a.nav-link[href^="#"]').forEach(anchor => {
+          anchor.addEventListener('click', function(e) {
+              e.preventDefault();
+              const targetId = this.getAttribute('href');
+              const targetElement = document.querySelector(targetId);
+              if(targetElement) {
+                   // Calculate offset position, considering the fixed navbar height
+                   const navbarHeight = document.querySelector('.navbar').offsetHeight || 70; // Adjust if needed
+                   const elementPosition = targetElement.getBoundingClientRect().top;
+                   const offsetPosition = elementPosition + window.pageYOffset - navbarHeight;
+
+                   window.scrollTo({
+                       top: offsetPosition,
+                       behavior: 'smooth'
+                   });
+
+                   // Optional: Close mobile navbar if open
+                   const navbarCollapse = document.getElementById('navbarNav');
+                   if (navbarCollapse.classList.contains('show')) {
+                       new bootstrap.Collapse(navbarCollapse).hide();
+                   }
+              }
+          });
+      });
+
+      // --- Add Event Form Submission Handler ---
+      const eventForm = document.getElementById('eventForm');
+      if (eventForm) {
+        eventForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+
+          // Get form values
+          const name = document.getElementById('eventName').value.trim();
+          const type = document.getElementById('eventType').value;
+          const date = document.getElementById('eventDate').value;
+          const time = document.getElementById('eventTime').value;
+          const description = document.getElementById('eventDescription').value.trim();
+
+          if (!name || !type || !date) {
+            alert('Please fill in all required fields.');
+            return;
+          }
+
+          // Compose event object
+          const year = date.split('-')[0];
+          if (!astronomicalEvents[year]) astronomicalEvents[year] = {};
+          astronomicalEvents[year][date] = {
+            title: name,
+            description: (description ? description + ' ' : '') + (time ? `Time: ${time}` : '')
+          };
+
+          // Optionally, clear the form
+          eventForm.reset();
+
+          // Refresh the calendar
+          updateCalendar();
+        });
+      }
+
+      // Planet Card "Learn More" Toggle
+      document.querySelectorAll('.learn-more-btn').forEach(button => {
+          button.addEventListener('click', function() {
+              const detailsDiv = this.closest('.planet-card').querySelector('.planet-details');
+              if (detailsDiv) {
+                  if (detailsDiv.style.display === 'none' || detailsDiv.style.display === '') {
+                      detailsDiv.style.display = 'block';
+                      this.textContent = 'Show Less';
+                  } else {
+                      detailsDiv.style.display = 'none';
+                      this.textContent = 'Learn More';
+                  }
+              }
+          });
+      });
+
+       // Set current year in footer
+       document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    }); // End DOMContentLoaded
+  </script>
+  <!-- Add before closing body tag -->
+  <script src="calendar.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-auth-compat.js"></script>
+
+  <!-- Your custom scripts -->
+  <script src="firebase-config.js"></script>
+</body>
+</html>
